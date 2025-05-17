@@ -1,0 +1,623 @@
+/* Reset & Global Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Open Sans', 'Arial', sans-serif;
+    line-height: 1.7;
+    background-color: #121212; /* Culoarea principală de fundal a site-ului */
+    color: #e0e0e0;
+    overflow-x: hidden; /* Previne apariția scrollbar-ului orizontal */
+    /* Ascunde scrollbar pentru IE, Edge (versiuni mai vechi) */
+    -ms-overflow-style: none;
+    /* Ascunde scrollbar pentru Firefox */
+    scrollbar-width: none;
+}
+/* Ascunde scrollbar pentru browsere bazate pe WebKit (Chrome, Safari, Opera, Edge nou) */
+body::-webkit-scrollbar {
+    display: none;
+}
+
+
+/* ===== LOADING SCREEN STYLES ===== */
+#loader-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #0c0c0c; /* Un negru puțin diferit pentru loader */
+    z-index: 999999; /* Asigură că este deasupra tuturor elementelor */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1); /* Adăugat pentru o tranziție de transformare */
+    transition: opacity 0.6s cubic-bezier(0.65, 0, 0.35, 1), /* Opacitatea dispare puțin mai repede */
+                transform 0.8s cubic-bezier(0.65, 0, 0.35, 1), /* Transformarea durează puțin mai mult */
+                visibility 0s linear 0.8s; /* Se ascunde după ce transformarea e gata */
+}
+
+#loader-wrapper.hidden {
+    opacity: 0;
+    transform: translateY(-40px) scale(0.95);
+    visibility: hidden;
+}
+
+.loader-content {
+    text-align: center;
+    padding: 20px;
+}
+
+#loading-text-animation {
+    font-family: 'Montserrat', 'Arial', sans-serif;
+    font-size: clamp(2rem, 7vw, 3.8rem);
+    font-weight: 700;
+    color: #ffc107;
+    letter-spacing: 1.5px;
+    line-height: 1.2;
+    transition: opacity 0.3s ease-out;
+}
+
+#loading-text-animation::after {
+    content: '_';
+    opacity: 1;
+    animation: blinkCursor 0.9s infinite steps(1, start);
+    margin-left: 4px;
+    font-weight: normal;
+    color: rgba(255, 193, 7, 0.7);
+}
+
+@keyframes blinkCursor {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* ===== MAIN CONTENT INITIAL STATE & APPEARANCE ===== */
+#main-content {
+    opacity: 0;
+    visibility: hidden;
+}
+
+#main-content.loaded {
+    opacity: 1;
+    visibility: visible;
+}
+
+
+/* ===== UTILITY & GENERAL STYLES ===== */
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.section-padding {
+    padding: 80px 0;
+}
+
+/* ===== HERO SECTION ===== */
+.hero {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #fff;
+    overflow: hidden;
+}
+
+.background-blur {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('/images/background.png') no-repeat center center/cover;
+    filter: blur(8px) brightness(0.6);
+    transform: scale(1.1);
+    z-index: -1;
+}
+
+.hero .container {
+    z-index: 1;
+    position: relative;
+}
+
+.hero-title {
+    font-family: 'Montserrat', 'Arial', sans-serif;
+    font-size: clamp(2.8rem, 6vw, 4.8rem);
+    margin-bottom: 20px;
+    font-weight: 700;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.7);
+    line-height: 1.2;
+}
+
+.hero-title span {
+    color: #ffc107;
+    text-shadow: 0 0 15px rgba(255, 193, 7, 0.5);
+}
+
+.hero-subtitle {
+    font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+    margin-bottom: 35px;
+    font-weight: 400;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    text-shadow: 0 1px 5px rgba(0,0,0,0.6);
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    /* Am adăugat justify-content: center; aici pentru a centra conținutul
+       în toate butoanele care folosesc inline-flex, ca o regulă generală bună.
+       Dacă un buton este intenționat mai lat decât conținutul său (ex: prin width fix),
+       acest lucru va centra conținutul. */
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: #ffc107;
+    color: #181818;
+    text-decoration: none;
+    font-weight: bold;
+    font-family: 'Montserrat', 'Arial', sans-serif;
+    border-radius: 8px;
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
+                background-color 0.3s ease,
+                box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25), 0 2px 6px rgba(0,0,0,0.15);
+    font-size: 0.95rem;
+    /* text-align: center; - Nu mai este necesar dacă folosim justify-content: center cu inline-flex */
+}
+
+.btn:hover, .btn:focus {
+    transform: translateY(-3px) scale(1.03);
+    background-color: #ffca2c;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3), 0 4px 10px rgba(0,0,0,0.2);
+    outline: none;
+}
+
+.btn:active {
+    transform: translateY(-1px) scale(1.01);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2), 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.btn-secondary {
+    background: #3e3e3e;
+    color: #ffc107;
+    border: 2px solid #ffc107;
+}
+
+.btn-secondary:hover, .btn-secondary:focus {
+    background: #ffc107;
+    color: #181818;
+    border-color: #ffc107;
+}
+
+.btn.disabled, .btn.disabled:hover, .btn.disabled:focus {
+    background-color: #555;
+    color: #999;
+    border-color: #555;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* ===== SECTION TITLES (Shared) ===== */
+.about h2, .projects h2 {
+    font-family: 'Montserrat', 'Arial', sans-serif;
+    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    margin-bottom: 40px;
+    color: #ffc107;
+    font-weight: 700;
+    text-align: center;
+}
+
+/* ===== ABOUT SECTION ===== */
+.about {
+    background: #1a1a1a;
+}
+
+.about p {
+    font-size: clamp(1rem, 2vw, 1.15rem);
+    margin-bottom: 30px;
+    line-height: 1.8;
+    max-width: 750px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    color: #c0c0c0;
+}
+
+.about h3 {
+    font-family: 'Montserrat', 'Arial', sans-serif;
+    font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+    margin-bottom: 30px;
+    margin-top: 50px;
+    color: #ffc107;
+    text-align: center;
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 35px;
+    justify-items: center;
+}
+
+.team-card {
+    background: #252525;
+    border: 1px solid #383838;
+    border-radius: 12px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.35s ease, border-color 0.35s ease;
+    border-left: 5px solid transparent;
+}
+
+.team-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    border-color: #444;
+    border-left-color: #ffc107;
+}
+
+.team-card img {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    margin-bottom: 20px;
+    border: 4px solid #ffc107;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    box-shadow: 0 0 15px rgba(255, 193, 7, 0.3);
+}
+
+.team-card:hover img {
+    transform: scale(1.1);
+    box-shadow: 0 0 25px rgba(255, 193, 7, 0.5);
+}
+
+.team-card h4 {
+    font-family: 'Montserrat', 'Arial', sans-serif;
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+    color: #ffc107;
+}
+
+.team-card .team-role {
+    font-size: 0.9rem;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+}
+
+.team-card p:not(.team-role) {
+    font-size: 1rem;
+    color: #b0b0b0;
+    line-height: 1.7;
+}
+
+/* ===== PROJECTS SECTION ===== */
+.projects {
+    background: #121212;
+}
+
+.project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 35px;
+}
+
+.project-card {
+    background: #202020;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.35s ease;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #333;
+}
+
+.project-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+}
+
+.project-card img {
+    width: 100%;
+    height: 230px;
+    object-fit: cover;
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s;
+    opacity: 0.9;
+}
+
+.project-card:hover img {
+    transform: scale(1.08);
+    opacity: 1;
+}
+
+.project-card-content {
+    padding: 25px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.project-card h3 {
+    font-family: 'Montserrat', 'Arial', sans-serif;
+    font-size: 1.7rem;
+    margin-bottom: 12px;
+    color: #ffc107;
+}
+
+.project-card p {
+    font-size: 1rem;
+    color: #b0b0b0;
+    margin-bottom: 25px;
+    line-height: 1.7;
+    flex-grow: 1;
+}
+
+.project-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: auto;
+    flex-wrap: wrap;
+    /* Butoanele din carduri vor moșteni justify-content: center din .btn general */
+}
+
+/* ===== POP-UP FOR PROJECT DETAILS ===== */
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.88);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+    backdrop-filter: blur(6px);
+}
+
+.popup.visible {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
+}
+
+.popup-content {
+    background: #282828;
+    padding: 35px;
+    border-radius: 10px;
+    color: #fff;
+    max-width: 650px;
+    width: 90%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    position: relative;
+    transform: scale(0.95) translateY(20px);
+    opacity: 0;
+    transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+}
+
+.popup.visible .popup-content {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+.popup-content h2 {
+    font-family: 'Montserrat', 'Arial', sans-serif;
+    margin-bottom: 15px;
+    color: #ffc107;
+    font-size: 1.9rem;
+    border-bottom: 1px solid #444;
+    padding-bottom: 10px;
+}
+
+.popup-content p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #d0d0d0;
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 2.2rem;
+    color: #888;
+    cursor: pointer;
+    transition: color 0.3s ease, transform 0.3s ease;
+    line-height: 1;
+}
+
+.close-btn:hover {
+    color: #ffc107;
+    transform: rotate(180deg) scale(1.1);
+}
+
+/* ===== FOOTER ===== */
+footer {
+    text-align: center;
+    padding: 40px 20px;
+    background: #0a0a0a;
+    color: #777;
+    font-size: 0.9rem;
+    border-top: 1px solid #222;
+}
+footer p {
+    letter-spacing: 0.5px;
+}
+
+/* ===== SCROLL ANIMATIONS (Fade-in for sections) ===== */
+.fade-in-scroll {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s ease-out, transform 0.7s cubic-bezier(0.215, 0.610, 0.355, 1);
+}
+
+.fade-in-scroll.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ===== RESPONSIVE DESIGN (Media Queries) ===== */
+@media (max-width: 992px) {
+    .project-grid {
+        grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    }
+     .section-padding {
+        padding-top: 70px;
+        padding-bottom: 70px;
+    }
+}
+
+@media (max-width: 768px) {
+    .section-padding {
+        padding-top: 60px;
+        padding-bottom: 60px;
+    }
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    .hero-subtitle {
+        font-size: 1.2rem;
+    }
+    .hero-buttons {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+    .btn { /* Aici se aplică stilurile pentru butoanele .hero-buttons pe mobil */
+        width: 70%;
+        max-width: 300px;
+        padding: 12px 20px;
+        font-size: 0.9rem;
+        /* justify-content: center; este deja în regula globală .btn */
+    }
+
+    .about h2, .projects h2 {
+        font-size: 2rem;
+        margin-bottom: 30px;
+    }
+    .about h3 {
+        font-size: 1.8rem;
+    }
+
+    .project-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    .project-card {
+        text-align: center;
+    }
+    .project-card-content {
+        align-items: center;
+        padding: 20px;
+    }
+    .project-card h3 {
+        font-size: 1.5rem;
+    }
+    .project-buttons {
+        justify-content: center;
+         /* Asigură că butoanele în sine sunt centrate în containerul .project-buttons */
+    }
+    /* Butoanele .project-buttons .btn vor moșteni justify-content: center din .btn */
+    /* și își vor ajusta lățimea în funcție de padding și conținut, dacă nu au width setat. */
+
+
+    .team-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    .team-card {
+        padding: 25px;
+    }
+    .team-card h4 {
+        font-size: 1.3rem;
+    }
+
+    .popup-content {
+        padding: 25px;
+        width: 95%;
+    }
+    .popup-content h2 {
+        font-size: 1.6rem;
+    }
+    .popup-content p {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    #loading-text-animation {
+      font-size: clamp(1.8rem, 7vw, 2.8rem);
+    }
+    #loading-text-animation::after {
+        margin-left: 1px;
+    }
+    .container {
+        padding: 0 10px;
+    }
+    .section-padding {
+        padding-top: 50px;
+        padding-bottom: 50px;
+    }
+    .hero-title {
+        font-size: 2rem;
+    }
+    .hero-subtitle {
+        font-size: 1rem;
+        margin-bottom: 25px;
+    }
+    .btn { /* Se aplică și aici .hero-buttons .btn */
+        width: 85%;
+        /* max-width: 300px este moștenit */
+        /* justify-content: center; este deja în regula globală .btn */
+    }
+
+    .about h2, .projects h2 {
+        font-size: 1.8rem;
+    }
+    .about h3 {
+        font-size: 1.5rem;
+    }
+
+     .project-card h3 {
+        font-size: 1.4rem;
+    }
+     .project-card img {
+        height: 200px;
+    }
+}
