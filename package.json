@@ -1,6 +1,15 @@
 {
+  "scripts": {
+    "start": "nodemon --quiet --watch . --trace-warnings app.js",
+    "dev": "nodemon --inspect --verbose --watch . --trace-warnings app.js"
+  },
   "dependencies": {
     "ejs": "^3.1.10",
     "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.10"
   }
 }
