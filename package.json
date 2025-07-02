@@ -1,4 +1,9 @@
 {
+  "name": "skypixel",
+  "version": "1.0.2",
+  "description": "A short description of your website.",
+  "author": "MaxUltimat3",
+  "main": "app.js",
   "scripts": {
     "start": "nodemon --quiet --watch . --trace-warnings app.js",
     "dev": "nodemon --inspect --verbose --watch . --trace-warnings app.js"
