@@ -35,6 +35,11 @@ app.get('/about', (req, res) => {
     res.render('about', { title: 'About Us - Skypixel' });
 });
 
+app.get('/serverlauncher', (req, res) => {
+    // Trimite fișierul HTML static. `res.sendFile` este metoda corectă pentru fișiere statice.
+    res.sendFile(path.join(__dirname, 'views', 'serverlauncher.html'));
+});
+
 
 // --- Pornirea serverului ---
 app.listen(PORT, () => {
