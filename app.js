@@ -1,10 +1,14 @@
 // Importăm modulele necesare
 const express = require('express');
 const path = require('path');
+const morgan = require('morgan');
 
 // Inițializăm aplicația Express
 const app = express();
 const PORT = 3000;
+
+// Folosim morgan pentru a loga cererile HTTP în consolă
+app.use(morgan('dev'));
 
 // Setăm directorul 'public' pentru a servi fișiere statice (CSS, JS, imagini)
 // Serverul va căuta fișierele cerute la căi precum '/css/style.css' în directorul 'public/css/style.css'
