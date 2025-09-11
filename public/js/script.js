@@ -71,11 +71,39 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- Random hero background (index page only) ---
+    (function setRandomHeroBackground() {
+        const heroBg = document.querySelector('.hero .background-blur');
+        if (!heroBg) return; // not on index
+
+        const seed = Math.floor(Math.random() * 1e9);
+        const url = `https://source.unsplash.com/1600x900/?landscape,nature,scenery,mountain,forest&sig=${seed}`;
+
+        const img = new Image();
+        // Avoid layout shifts while loading
+        img.decoding = 'async';
+        img.loading = 'eager';
+        img.referrerPolicy = 'no-referrer';
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+            heroBg.style.setProperty('--hero-random-bg', `url("${url}")`);
+            heroBg.classList.add('random-ready');
+        };
+        img.onerror = () => {
+            // Fallback: keep local background image
+        };
+        img.src = url;
+    })();
+
     // --- Initialization ---
     if (loadingTextElement) {
         animateLoadingText();
     }
 
+    // Show content shortly after DOM is ready to avoid blocking on all assets
+    setTimeout(showWebsiteContent, 250);
+
+    // Fallback: ensure content is shown after full load as well
     window.onload = () => {
         showWebsiteContent();
     };
@@ -89,6 +117,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 observer.unobserve(entry.target);
             }
         });
-    }, { threshold: 0.1 });
-    animatedElements.forEach(el => observer.observe(el));
+    }, { threshold: 0.01, rootMargin: '0px 0px 12% 0px' });
+    animatedElements.forEach((el) => {
+        // eliminăm întârzierea suplimentară pentru răspuns instant la scroll
+        el.style.transitionDelay = '';
+        observer.observe(el);
+    });
 });

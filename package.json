@@ -5,12 +5,15 @@
   "author": "MaxUltimat3",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon --quiet --watch . --trace-warnings app.js",
+    "start": "NODE_ENV=production node app.js",
     "dev": "nodemon --inspect --verbose --watch . --trace-warnings app.js"
   },
   "dependencies": {
+    "compression": "^1.8.1",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0",
     "morgan": "^1.10.1"
   },
   "devDependencies": {

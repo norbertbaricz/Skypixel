@@ -3,38 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#121212">
     <title><%= title %></title>
     <link rel="icon" type="image/png" href="/images/logo.png">
+
+    <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css?v=<%= assetVersion %>">
+    <link rel="preload" as="image" href="/images/background.jpg">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" media="print" onload="this.media='all'" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous">
 </head>
 <body>
-    <!-- ===== Loader Section ===== -->
-    <div id="loader-wrapper">
-        <div class="loader-content">
+    <!-- Loading screen -->
+    <div id="loader-wrapper" aria-hidden="true">
+        <div class="loader-content" aria-live="polite" aria-atomic="true">
             <div id="loading-text-animation"></div>
         </div>
     </div>
 
-    <!-- ===== Main Content Section ===== -->
-    <div id="main-content">
-        <header class="hero">
-            <div class="background-blur"></div>
+    <!-- Main content -->
+    <main id="main-content" role="main">
+        <header class="hero" aria-label="Skypixel hero">
+            <div class="background-blur" aria-hidden="true"></div>
             <div class="container">
                 <h1 class="hero-title fade-in-scroll">Welcome to <span>Skypixel</span></h1>
-                <p class="hero-subtitle fade-in-scroll" style="animation-delay: 0.2s;">Explore our projects and discover creativity!</p>
-                <div class="hero-buttons fade-in-scroll" style="animation-delay: 0.4s;">
-                    <!-- Updated links to point to new pages -->
-                    <a href="/projects" class="btn"><i class="fas fa-briefcase"></i> View Projects</a>
-                    <a href="/about" class="btn"><i class="fas fa-users"></i> About Us</a>
+                <p class="hero-subtitle fade-in-scroll">Explore our projects and discover creativity!</p>
+                <div class="hero-buttons fade-in-scroll">
+                    <a href="/projects" class="btn" aria-label="View Projects">
+                        <i class="fas fa-briefcase" aria-hidden="true"></i>
+                        View Projects
+                    </a>
+                    <a href="/about" class="btn btn-secondary" aria-label="About Us">
+                        <i class="fas fa-users" aria-hidden="true"></i>
+                        About Us
+                    </a>
                 </div>
             </div>
         </header>
-    </div>
-    <!-- Main script for loader and global effects -->
-    <script src="/js/script.js"></script>
+    </main>
+
+    <!-- Scripts -->
+    <script defer src="/js/script.js?v=<%= assetVersion %>"></script>
 </body>
 </html>

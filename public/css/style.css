@@ -9,6 +9,12 @@ html {
     scroll-behavior: smooth;
 }
 
+:root {
+    /* Înălțimea cardului de proiect pe desktop/tablet */
+    --project-card-h: 360px;
+    --footer-h: 64px;
+}
+
 body {
     font-family: 'Open Sans', 'Arial', sans-serif;
     line-height: 1.7;
@@ -20,6 +26,15 @@ body {
 }
 body::-webkit-scrollbar {
     display: none;
+}
+
+/* Hide scrollbars globally but keep scrolling functional */
+html {
+    -ms-overflow-style: none; /* IE/Edge legacy */
+    scrollbar-width: none;    /* Firefox */
+}
+html::-webkit-scrollbar {
+    display: none;            /* Chrome/Safari/Edge (Blink/WebKit) */
 }
 
 /* ===== LOADING SCREEN STYLES ===== */
@@ -76,6 +91,8 @@ body::-webkit-scrollbar {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.5s ease-in;
+    position: relative;
+    z-index: 1;
 }
 
 #main-content.loaded {
@@ -87,11 +104,12 @@ body::-webkit-scrollbar {
 .navbar {
     background: rgba(18, 18, 18, 0.8);
     backdrop-filter: blur(10px);
-    padding: 15px 0;
+    padding: calc(15px + env(safe-area-inset-top, 0px)) 0 15px 0;
     position: sticky;
     top: 0;
     z-index: 1000;
-    border-bottom: 1px solid #222;
+    border-bottom: 0; /* remove visible outline */
+    outline: none;
 }
 
 .navbar .container {
@@ -144,7 +162,31 @@ body::-webkit-scrollbar {
     align-items: center;
     text-align: center;
     color: #fff;
-    overflow: hidden;
+    /* Permite efecte (umbra) să nu fie tăiate */
+    overflow: visible;
+}
+
+/* Page-wide blurred background (Projects, About) */
+.page-blur {
+    position: fixed;
+    inset: 0;
+    background: url('/images/background.jpg') no-repeat center center/cover;
+    filter: blur(8px) brightness(0.6);
+    transform: scale(1.1);
+    z-index: -1; /* mereu sub conținut */
+    pointer-events: none;
+}
+/* Optimizări mobile: micșorează intensitatea blur-ului și umbrele grele */
+@media (max-width: 480px) {
+    .page-blur { filter: blur(6px) brightness(0.6); }
+    .navbar, .sticky-footer { backdrop-filter: blur(6px); }
+    .background-blur::before, .background-blur::after { filter: blur(6px) brightness(0.6); }
+    .project-card { box-shadow: 0 6px 16px rgba(0,0,0,0.45); }
+    .team-card { box-shadow: 0 5px 14px rgba(0,0,0,0.4); }
+}
+/* Ajustează înălțimea footer-ului pe ecrane mici */
+@media (max-width: 480px) {
+    :root { --footer-h: 56px; }
 }
 
 .background-blur {
@@ -153,15 +195,44 @@ body::-webkit-scrollbar {
     left: 0;
     width: 100%;
     height: 100%;
+    z-index: -1;
+    will-change: opacity, transform;
+    overflow: hidden; /* Păstrează straturile pseudo în interiorul eroului */
+}
+
+/* Strat de bază: imaginea locală */
+.background-blur::before {
+    content: "";
+    position: absolute;
+    inset: 0;
     background: url('/images/background.jpg') no-repeat center center/cover;
     filter: blur(8px) brightness(0.6);
     transform: scale(1.1);
-    z-index: -1;
+}
+
+/* Layer for smooth cross-fade when random image is ready */
+.background-blur::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: var(--hero-random-bg);
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+    filter: blur(8px) brightness(0.6);
+    transform: scale(1.1);
+    opacity: 0;
+    transition: opacity 0.8s ease-out;
+}
+
+.background-blur.random-ready::after {
+    opacity: 1;
 }
 
 .hero .container {
     z-index: 1;
     position: relative;
+    overflow: visible;
 }
 
 .hero-title {
@@ -193,6 +264,8 @@ body::-webkit-scrollbar {
     gap: 20px;
     justify-content: center;
     flex-wrap: wrap;
+    overflow: visible;
+    margin-top: 0;
 }
 
 /* ===== BUTTONS (Original "Bouncy" Animation) ===== */
@@ -213,10 +286,20 @@ body::-webkit-scrollbar {
     border: none;
     box-shadow: 0 4px 12px rgba(0,0,0,0.25), 0 2px 6px rgba(0,0,0,0.15);
     font-size: 0.95rem;
+    will-change: transform;
+    line-height: 1.2;
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    transform-origin: center center;
+    overflow: visible;
+    transform: translateZ(0);
+    min-height: 44px; /* tap target accesibil pe mobil */
+    min-width: 44px;
+    touch-action: manipulation;
 }
 
 .btn:hover, .btn:focus {
-    transform: translateY(-3px) scale(1.03);
+    transform: translateY(-2px) scale(1.02);
     background-color: #ffca2c;
     box-shadow: 0 8px 20px rgba(0,0,0,0.3), 0 4px 10px rgba(0,0,0,0.2);
     outline: none;
@@ -259,9 +342,7 @@ body::-webkit-scrollbar {
 }
 
 /* ===== ABOUT SECTION ===== */
-.about {
-    background: #1a1a1a;
-}
+.about { background: transparent; }
 
 .about p {
     font-size: clamp(1rem, 2vw, 1.15rem);
@@ -292,18 +373,20 @@ body::-webkit-scrollbar {
 
 .team-card {
     background: #252525;
-    border: 1px solid #383838;
+    border: none;
     border-radius: 12px;
     padding: 30px;
     text-align: center;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
     transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.35s ease, border-color 0.35s ease;
     border-left: 5px solid transparent;
+    outline: none;
+    position: relative;
 }
 
 .team-card:hover {
     transform: translateY(-10px) scale(1.02);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.5);
     border-color: #444;
     border-left-color: #ffc107;
 }
@@ -322,6 +405,18 @@ body::-webkit-scrollbar {
     transform: scale(1.1);
     box-shadow: 0 0 25px rgba(255, 193, 7, 0.5);
 }
+/* accent discret pe hover pentru team-card */
+.team-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 193, 7, 0.12);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+.team-card:hover::before { opacity: 1; }
 
 .team-card h4 {
     font-family: 'Montserrat', 'Arial', sans-serif;
@@ -345,13 +440,11 @@ body::-webkit-scrollbar {
 }
 
 /* ===== PROJECTS SECTION ===== */
-.projects {
-    background: #121212;
-}
+.projects { background: transparent; }
 
 .project-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    display: flex;
+    flex-direction: column;
     gap: 35px;
 }
 
@@ -362,21 +455,43 @@ body::-webkit-scrollbar {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
     transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.35s ease;
     display: flex;
-    flex-direction: column;
-    border: 1px solid #333;
+    flex-direction: column; /* mobile default: imagine sus, text jos */
+    border: none;
+    outline: none;
+    position: relative;
+    will-change: transform, box-shadow;
+    transform: translateZ(0);
 }
 
 .project-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+    transform: translateY(-8px);
+    box-shadow: 0 16px 38px rgba(0, 0, 0, 0.55);
 }
 
+/* accent discret pe hover: chenar luminos fin */
+.project-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(255, 193, 7, 0.14);
+    border-radius: 12px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+.project-card:hover::before { opacity: 1; }
+
 .project-card img {
+    display: block;
     width: 100%;
-    height: 230px;
+    height: auto; /* mobile */
+    aspect-ratio: 16 / 9; /* proporție stabilă pe mobil */
     object-fit: cover;
+    object-position: center;
     transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s;
     opacity: 0.9;
+    will-change: transform, opacity;
+    transform: translateZ(0);
 }
 
 .project-card:hover img {
@@ -390,6 +505,12 @@ body::-webkit-scrollbar {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    gap: 12px;
+}
+
+/* Centrează titlul și descrierea din cardurile Projects */
+.project-card-content > div:first-child {
+    text-align: center;
 }
 
 .project-card h3 {
@@ -407,11 +528,46 @@ body::-webkit-scrollbar {
     flex-grow: 1;
 }
 
+/* Remove any card outline/border accents in all states */
+.project-card,
+.project-card:hover,
+.project-card:focus,
+.project-card:active,
+.project-card:focus-within,
+.team-card,
+.team-card:hover,
+.team-card:focus,
+.team-card:active,
+.team-card:focus-within {
+    outline: none !important;
+    border: none !important;
+}
+.project-card::before,
+.project-card:hover::before,
+.team-card::before,
+.team-card:hover::before {
+    content: none !important;
+    opacity: 0 !important;
+    border: 0 !important;
+}
+
+/* Role/Tag styling used across popups and cards */
+.team-role, .project-tag {
+    font-size: 0.9rem;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
 .project-buttons {
     display: flex;
     gap: 12px;
     margin-top: auto;
     flex-wrap: wrap;
+    flex-shrink: 0;
+    justify-content: center;
+    align-items: center;
 }
 
 /* ===== POP-UP FOR PROJECT DETAILS ===== */
@@ -450,11 +606,96 @@ body::-webkit-scrollbar {
     transform: scale(0.95);
     opacity: 0;
     transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+    will-change: transform, opacity;
+    max-height: 86vh; /* previne overflow pe înălțime */
+    overflow: auto;
+    box-sizing: border-box;
 }
 
 .popup.visible .popup-content {
     transform: scale(1);
     opacity: 1;
+}
+
+/* Detailed popups (About + Projects) */
+.popup-content.team,
+.popup-content.project {
+    max-width: 1440px; /* și mai lat pentru media mai mare, fără a strânge textul */
+}
+.team-popup-grid,
+.project-popup-grid {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    align-items: center; /* centrează vertical imagine + text */
+    gap: 28px; /* puțin mai mult spațiu între imagine și text */
+}
+.popup-content.team #team-avatar,
+.popup-content.project #project-image {
+    width: 220px;
+    height: 220px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 3px solid #ffc107;
+    box-shadow: 0 0 18px rgba(255,193,7,0.25);
+}
+.popup-content.team .team-popup-meta h2,
+.popup-content.project .project-popup-meta h2 {
+    margin: 0 0 8px 0;
+}
+.popup-content.team .team-role,
+.popup-content.project .project-tag {
+    margin: 0 0 14px 0;
+}
+.popup-content.team .team-popup-meta p,
+.popup-content.project .project-popup-meta p {
+    color: #d5d5d5;
+    line-height: 1.8;
+}
+@media (max-width: 720px) {
+    .team-popup-grid,
+    .project-popup-grid {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    .popup-content.team #team-avatar,
+    .popup-content.project #project-image {
+        margin: 0 auto;
+    }
+}
+
+/* Larger media in Projects popup */
+.popup-content.project .project-popup-grid {
+    grid-template-columns: 520px 1fr; /* imagine fixă, text cu mai multă lățime */
+}
+.popup-content.project #project-image {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16/9;
+}
+.popup-content.project .project-popup-meta {
+    align-self: center; /* menține textul centrat vertical față de imagine */
+    padding-right: 8px;
+}
+.popup-content.project .project-popup-meta p,
+.popup-content.team .team-popup-meta p {
+    overflow-wrap: anywhere;
+}
+@media (max-width: 1000px) {
+    .popup-content.project .project-popup-grid {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    .popup-content.project #project-image {
+        max-width: 560px;
+        margin: 0 auto;
+    }
+}
+
+/* Lărgește imaginea pe ecrane foarte late, păstrând echilibrul textului */
+@media (min-width: 1200px) {
+    .popup-content.project .project-popup-grid {
+        grid-template-columns: 520px 1fr; /* păstrăm aceeași lățime a imaginii, doar extindem textul */
+    }
 }
 
 .popup-content h2 {
@@ -496,6 +737,24 @@ footer {
     color: #777;
     font-size: 0.9rem;
     border-top: 1px solid #222;
+    position: relative;
+    z-index: 1; /* asigură vizibil peste blur */
+}
+/* Footer lipit (Projects, About) cu transparență ca navbar */
+.sticky-footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 14px 20px calc(14px + env(safe-area-inset-bottom, 0px));
+    background: rgba(18, 18, 18, 0.8);
+    backdrop-filter: blur(10px);
+    border-top: 0;
+    z-index: 1000;
+    outline: none;
+}
+.has-sticky-footer #main-content {
+    padding-bottom: calc(var(--footer-h) + env(safe-area-inset-bottom, 0px));
 }
 footer p {
     letter-spacing: 0.5px;
@@ -504,13 +763,27 @@ footer p {
 /* ===== SCROLL ANIMATIONS (Fade-in for sections) ===== */
 .fade-in-scroll {
     opacity: 0;
-    transform: translateY(40px);
-    transition: opacity 0.7s ease-out, transform 0.7s cubic-bezier(0.215, 0.610, 0.355, 1);
+    transform: translate3d(0, 16px, 0);
+    transition: 
+        opacity 0.35s ease-out,
+        transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 500px;
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    contain: paint;
+}
+
+/* În secțiunea hero, randăm conținutul imediat pentru a evita artefacte vizuale */
+.hero .fade-in-scroll {
+    content-visibility: visible;
+    contain-intrinsic-size: auto;
+    contain: none; /* evită izolare de paint în hero */
 }
 
 .fade-in-scroll.visible {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
 }
 
 /* ===== RESPONSIVE DESIGN (Media Queries) ===== */
@@ -543,3 +816,77 @@ footer p {
         grid-template-columns: 1fr;
     }
 }
+
+/* Desktop/tablet: afișează fiecare proiect ca layout pe două coloane, unul sub altul */
+@media (min-width: 769px) {
+    .project-card {
+        display: grid;
+        grid-template-columns: minmax(280px, 34%) 1fr;
+        align-items: stretch;
+        height: var(--project-card-h, 360px);
+    }
+    .project-card img {
+        height: 100%;
+        width: 100%;
+        aspect-ratio: auto; /* pe desktop umple întreaga coloană */
+        align-self: stretch;
+        justify-self: stretch;
+        /* fade soft la marginea unde se termină imaginea */
+        -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,1) 88%, rgba(0,0,0,0) 100%);
+        mask-image: linear-gradient(to right, rgba(0,0,0,1) 88%, rgba(0,0,0,0) 100%);
+    }
+    .project-card-content {
+        padding: 26px;
+        overflow: hidden;
+        min-height: 0;
+        min-width: 0;
+        display: grid;
+        grid-template-rows: minmax(0, 1fr) auto;
+        row-gap: 12px;
+    }
+    /* containerul pentru titlu + descriere (primul <div> din content) devine flexibil */
+    .project-card-content > div:first-child {
+        min-height: 0;
+        display: grid;
+        align-content: center; /* centrează vertical titlul + descrierea */
+        justify-items: center;  /* centrează orizontal elementele */
+        text-align: center;
+        gap: 8px;
+    }
+    /* limitează descrierea pentru a păstra înălțimi egale */
+    .project-card p {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        overflow-wrap: anywhere;
+        line-height: 1.6;
+        max-height: calc(1.6em * 2);
+        margin-bottom: 0; /* evită dublarea cu gap-ul gridului */
+    }
+    /* limitează titlul la 2 linii pentru consistență */
+    .project-card h3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-height: 1.25;
+        max-height: calc(1.25em * 2);
+        margin-bottom: 8px;
+    }
+    .project-buttons { 
+        margin-top: 0; 
+        gap: 12px;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;           /* permite trecerea pe rând 2 dacă e necesar */
+        min-height: 44px;          /* înălțime stabilă pentru rândul de butoane */
+        width: 100%;
+    }
+    .project-buttons .btn { white-space: nowrap; }
+}
+
+/* Respectă preferințele utilizatorilor pentru mișcare redusă */
+/* Note: dacă dorești mod "reduce motion", îl putem adăuga opțional ulterior. */
+
+/* (Reverted) index-only no-scroll overrides removed to restore original layout */
