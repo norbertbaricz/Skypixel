@@ -1,4 +1,3 @@
-// Details popup for About page (team members)
 document.addEventListener('DOMContentLoaded', () => {
   const popup = document.getElementById('team-popup');
   const closeBtn = popup?.querySelector('.close-btn');

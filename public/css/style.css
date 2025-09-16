@@ -1,4 +1,3 @@
-/* Reset & Global Styles */
 * {
     margin: 0;
     padding: 0;
@@ -10,7 +9,7 @@ html {
 }
 
 :root {
-    /* Înălțimea cardului de proiect pe desktop/tablet */
+
     --project-card-h: 360px;
     --footer-h: 64px;
 }
@@ -28,16 +27,14 @@ body::-webkit-scrollbar {
     display: none;
 }
 
-/* Hide scrollbars globally but keep scrolling functional */
 html {
-    -ms-overflow-style: none; /* IE/Edge legacy */
-    scrollbar-width: none;    /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 html::-webkit-scrollbar {
-    display: none;            /* Chrome/Safari/Edge (Blink/WebKit) */
+    display: none;
 }
 
-/* ===== LOADING SCREEN STYLES ===== */
 #loader-wrapper {
     position: fixed;
     top: 0;
@@ -86,7 +83,6 @@ html::-webkit-scrollbar {
     50% { opacity: 0; }
 }
 
-/* ===== MAIN CONTENT INITIAL STATE & APPEARANCE ===== */
 #main-content {
     opacity: 0;
     visibility: hidden;
@@ -100,7 +96,6 @@ html::-webkit-scrollbar {
     visibility: visible;
 }
 
-/* ===== NAVBAR FOR SUB-PAGES ===== */
 .navbar {
     background: rgba(18, 18, 18, 0.8);
     backdrop-filter: blur(10px);
@@ -108,7 +103,7 @@ html::-webkit-scrollbar {
     position: sticky;
     top: 0;
     z-index: 1000;
-    border-bottom: 0; /* remove visible outline */
+    border-bottom: 0;
     outline: none;
 }
 
@@ -139,8 +134,6 @@ html::-webkit-scrollbar {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-
-/* ===== UTILITY & GENERAL STYLES ===== */
 .container {
     width: 90%;
     max-width: 1200px;
@@ -152,7 +145,6 @@ html::-webkit-scrollbar {
     padding: 80px 0;
 }
 
-/* ===== HERO SECTION ===== */
 .hero {
     position: relative;
     height: 100vh;
@@ -162,21 +154,20 @@ html::-webkit-scrollbar {
     align-items: center;
     text-align: center;
     color: #fff;
-    /* Permite efecte (umbra) să nu fie tăiate */
+
     overflow: visible;
 }
 
-/* Page-wide blurred background (Projects, About) */
 .page-blur {
     position: fixed;
     inset: 0;
     background: url('/images/background.jpg') no-repeat center center/cover;
     filter: blur(8px) brightness(0.6);
     transform: scale(1.1);
-    z-index: -1; /* mereu sub conținut */
+    z-index: -1;
     pointer-events: none;
 }
-/* Optimizări mobile: micșorează intensitatea blur-ului și umbrele grele */
+
 @media (max-width: 480px) {
     .page-blur { filter: blur(6px) brightness(0.6); }
     .navbar, .sticky-footer { backdrop-filter: blur(6px); }
@@ -184,7 +175,7 @@ html::-webkit-scrollbar {
     .project-card { box-shadow: 0 6px 16px rgba(0,0,0,0.45); }
     .team-card { box-shadow: 0 5px 14px rgba(0,0,0,0.4); }
 }
-/* Ajustează înălțimea footer-ului pe ecrane mici */
+
 @media (max-width: 480px) {
     :root { --footer-h: 56px; }
 }
@@ -197,10 +188,9 @@ html::-webkit-scrollbar {
     height: 100%;
     z-index: -1;
     will-change: opacity, transform;
-    overflow: hidden; /* Păstrează straturile pseudo în interiorul eroului */
+    overflow: hidden;
 }
 
-/* Strat de bază: imaginea locală */
 .background-blur::before {
     content: "";
     position: absolute;
@@ -210,7 +200,6 @@ html::-webkit-scrollbar {
     transform: scale(1.1);
 }
 
-/* Layer for smooth cross-fade when random image is ready */
 .background-blur::after {
     content: "";
     position: absolute;
@@ -268,7 +257,6 @@ html::-webkit-scrollbar {
     margin-top: 0;
 }
 
-/* ===== BUTTONS (Original "Bouncy" Animation) ===== */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -293,7 +281,7 @@ html::-webkit-scrollbar {
     transform-origin: center center;
     overflow: visible;
     transform: translateZ(0);
-    min-height: 44px; /* tap target accesibil pe mobil */
+    min-height: 44px;
     min-width: 44px;
     touch-action: manipulation;
 }
@@ -331,7 +319,6 @@ html::-webkit-scrollbar {
     transform: none;
 }
 
-/* ===== SECTION TITLES (Shared) ===== */
 .about h2, .projects h2 {
     font-family: 'Montserrat', 'Arial', sans-serif;
     font-size: clamp(2.2rem, 5vw, 3.2rem);
@@ -341,7 +328,6 @@ html::-webkit-scrollbar {
     text-align: center;
 }
 
-/* ===== ABOUT SECTION ===== */
 .about { background: transparent; }
 
 .about p {
@@ -405,7 +391,7 @@ html::-webkit-scrollbar {
     transform: scale(1.1);
     box-shadow: 0 0 25px rgba(255, 193, 7, 0.5);
 }
-/* accent discret pe hover pentru team-card */
+
 .team-card::before {
     content: "";
     position: absolute;
@@ -439,7 +425,6 @@ html::-webkit-scrollbar {
     line-height: 1.7;
 }
 
-/* ===== PROJECTS SECTION ===== */
 .projects { background: transparent; }
 
 .project-grid {
@@ -455,7 +440,7 @@ html::-webkit-scrollbar {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
     transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.35s ease;
     display: flex;
-    flex-direction: column; /* mobile default: imagine sus, text jos */
+    flex-direction: column;
     border: none;
     outline: none;
     position: relative;
@@ -468,7 +453,6 @@ html::-webkit-scrollbar {
     box-shadow: 0 16px 38px rgba(0, 0, 0, 0.55);
 }
 
-/* accent discret pe hover: chenar luminos fin */
 .project-card::before {
     content: "";
     position: absolute;
@@ -484,8 +468,8 @@ html::-webkit-scrollbar {
 .project-card img {
     display: block;
     width: 100%;
-    height: auto; /* mobile */
-    aspect-ratio: 16 / 9; /* proporție stabilă pe mobil */
+    height: auto;
+    aspect-ratio: 16 / 9;
     object-fit: cover;
     object-position: center;
     transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s;
@@ -508,7 +492,6 @@ html::-webkit-scrollbar {
     gap: 12px;
 }
 
-/* Centrează titlul și descrierea din cardurile Projects */
 .project-card-content > div:first-child {
     text-align: center;
 }
@@ -528,7 +511,6 @@ html::-webkit-scrollbar {
     flex-grow: 1;
 }
 
-/* Remove any card outline/border accents in all states */
 .project-card,
 .project-card:hover,
 .project-card:focus,
@@ -551,7 +533,6 @@ html::-webkit-scrollbar {
     border: 0 !important;
 }
 
-/* Role/Tag styling used across popups and cards */
 .team-role, .project-tag {
     font-size: 0.9rem;
     color: #aaa;
@@ -570,7 +551,6 @@ html::-webkit-scrollbar {
     align-items: center;
 }
 
-/* ===== POP-UP FOR PROJECT DETAILS ===== */
 .popup {
     position: fixed;
     top: 0;
@@ -607,7 +587,7 @@ html::-webkit-scrollbar {
     opacity: 0;
     transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
     will-change: transform, opacity;
-    max-height: 86vh; /* previne overflow pe înălțime */
+    max-height: 86vh;
     overflow: auto;
     box-sizing: border-box;
 }
@@ -617,17 +597,16 @@ html::-webkit-scrollbar {
     opacity: 1;
 }
 
-/* Detailed popups (About + Projects) */
 .popup-content.team,
 .popup-content.project {
-    max-width: 1440px; /* și mai lat pentru media mai mare, fără a strânge textul */
+    max-width: 1440px;
 }
 .team-popup-grid,
 .project-popup-grid {
     display: grid;
     grid-template-columns: 220px 1fr;
-    align-items: center; /* centrează vertical imagine + text */
-    gap: 28px; /* puțin mai mult spațiu între imagine și text */
+    align-items: center;
+    gap: 28px;
 }
 .popup-content.team #team-avatar,
 .popup-content.project #project-image {
@@ -663,9 +642,8 @@ html::-webkit-scrollbar {
     }
 }
 
-/* Larger media in Projects popup */
 .popup-content.project .project-popup-grid {
-    grid-template-columns: 520px 1fr; /* imagine fixă, text cu mai multă lățime */
+    grid-template-columns: 520px 1fr;
 }
 .popup-content.project #project-image {
     width: 100%;
@@ -673,7 +651,7 @@ html::-webkit-scrollbar {
     aspect-ratio: 16/9;
 }
 .popup-content.project .project-popup-meta {
-    align-self: center; /* menține textul centrat vertical față de imagine */
+    align-self: center;
     padding-right: 8px;
 }
 .popup-content.project .project-popup-meta p,
@@ -691,10 +669,9 @@ html::-webkit-scrollbar {
     }
 }
 
-/* Lărgește imaginea pe ecrane foarte late, păstrând echilibrul textului */
 @media (min-width: 1200px) {
     .popup-content.project .project-popup-grid {
-        grid-template-columns: 520px 1fr; /* păstrăm aceeași lățime a imaginii, doar extindem textul */
+        grid-template-columns: 520px 1fr;
     }
 }
 
@@ -729,7 +706,6 @@ html::-webkit-scrollbar {
     transform: rotate(180deg) scale(1.1);
 }
 
-/* ===== FOOTER ===== */
 footer {
     text-align: center;
     padding: 40px 20px;
@@ -738,9 +714,9 @@ footer {
     font-size: 0.9rem;
     border-top: 1px solid #222;
     position: relative;
-    z-index: 1; /* asigură vizibil peste blur */
+    z-index: 1;
 }
-/* Footer lipit (Projects, About) cu transparență ca navbar */
+
 .sticky-footer {
     position: fixed;
     left: 0;
@@ -760,11 +736,10 @@ footer p {
     letter-spacing: 0.5px;
 }
 
-/* ===== SCROLL ANIMATIONS (Fade-in for sections) ===== */
 .fade-in-scroll {
     opacity: 0;
     transform: translate3d(0, 16px, 0);
-    transition: 
+    transition:
         opacity 0.35s ease-out,
         transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
     content-visibility: auto;
@@ -774,11 +749,10 @@ footer p {
     contain: paint;
 }
 
-/* În secțiunea hero, randăm conținutul imediat pentru a evita artefacte vizuale */
 .hero .fade-in-scroll {
     content-visibility: visible;
     contain-intrinsic-size: auto;
-    contain: none; /* evită izolare de paint în hero */
+    contain: none;
 }
 
 .fade-in-scroll.visible {
@@ -786,7 +760,6 @@ footer p {
     transform: translate3d(0, 0, 0);
 }
 
-/* ===== RESPONSIVE DESIGN (Media Queries) ===== */
 @media (max-width: 768px) {
     .section-padding {
         padding-top: 60px;
@@ -811,13 +784,12 @@ footer p {
     .about h2, .projects h2 {
         font-size: 2rem;
     }
-    
+
     .project-grid, .team-grid {
         grid-template-columns: 1fr;
     }
 }
 
-/* Desktop/tablet: afișează fiecare proiect ca layout pe două coloane, unul sub altul */
 @media (min-width: 769px) {
     .project-card {
         display: grid;
@@ -828,10 +800,10 @@ footer p {
     .project-card img {
         height: 100%;
         width: 100%;
-        aspect-ratio: auto; /* pe desktop umple întreaga coloană */
+        aspect-ratio: auto;
         align-self: stretch;
         justify-self: stretch;
-        /* fade soft la marginea unde se termină imaginea */
+
         -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,1) 88%, rgba(0,0,0,0) 100%);
         mask-image: linear-gradient(to right, rgba(0,0,0,1) 88%, rgba(0,0,0,0) 100%);
     }
@@ -844,16 +816,16 @@ footer p {
         grid-template-rows: minmax(0, 1fr) auto;
         row-gap: 12px;
     }
-    /* containerul pentru titlu + descriere (primul <div> din content) devine flexibil */
+
     .project-card-content > div:first-child {
         min-height: 0;
         display: grid;
-        align-content: center; /* centrează vertical titlul + descrierea */
-        justify-items: center;  /* centrează orizontal elementele */
+        align-content: center;
+        justify-items: center;
         text-align: center;
         gap: 8px;
     }
-    /* limitează descrierea pentru a păstra înălțimi egale */
+
     .project-card p {
         display: -webkit-box;
         -webkit-line-clamp: 2;
@@ -862,9 +834,9 @@ footer p {
         overflow-wrap: anywhere;
         line-height: 1.6;
         max-height: calc(1.6em * 2);
-        margin-bottom: 0; /* evită dublarea cu gap-ul gridului */
+        margin-bottom: 0;
     }
-    /* limitează titlul la 2 linii pentru consistență */
+
     .project-card h3 {
         display: -webkit-box;
         -webkit-line-clamp: 2;
@@ -874,19 +846,14 @@ footer p {
         max-height: calc(1.25em * 2);
         margin-bottom: 8px;
     }
-    .project-buttons { 
-        margin-top: 0; 
+    .project-buttons {
+        margin-top: 0;
         gap: 12px;
         justify-content: center;
         align-items: center;
-        flex-wrap: wrap;           /* permite trecerea pe rând 2 dacă e necesar */
-        min-height: 44px;          /* înălțime stabilă pentru rândul de butoane */
+        flex-wrap: wrap;
+        min-height: 44px;
         width: 100%;
     }
     .project-buttons .btn { white-space: nowrap; }
 }
-
-/* Respectă preferințele utilizatorilor pentru mișcare redusă */
-/* Note: dacă dorești mod "reduce motion", îl putem adăuga opțional ulterior. */
-
-/* (Reverted) index-only no-scroll overrides removed to restore original layout */
