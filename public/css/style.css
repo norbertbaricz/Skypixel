@@ -271,7 +271,6 @@ html::-webkit-scrollbar {
     border-radius: 8px;
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.3s ease, box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     cursor: pointer;
-    border: none;
     box-shadow: 0 4px 12px rgba(0,0,0,0.25), 0 2px 6px rgba(0,0,0,0.15);
     font-size: 0.95rem;
     will-change: transform;
@@ -350,98 +349,240 @@ html::-webkit-scrollbar {
     text-align: center;
 }
 
-.team-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 35px;
-    justify-items: center;
+.team-section-heading {
+    font-family: 'Montserrat', 'Arial', sans-serif;
+    font-size: clamp(1.8rem, 4vw, 2.4rem);
+    margin: 40px auto 32px;
+    color: #ffffff;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-align: center;
 }
+
 
 .team-card {
-    background: #252525;
-    border: none;
-    border-radius: 12px;
-    padding: 30px;
+    background: radial-gradient(circle at top, rgba(255, 193, 7, 0.12) 0%, rgba(37, 37, 37, 0.92) 55%, rgba(22, 22, 22, 0.98) 100%);
+    border-radius: 22px;
+    padding: 34px 26px 28px;
     text-align: center;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
-    transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.35s ease, border-color 0.35s ease;
-    border-left: 5px solid transparent;
+    box-shadow: 0 16px 38px rgba(0, 0, 0, 0.45);
+    transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.35s ease, border-color 0.35s ease, background 0.35s ease;
+    border: 1px solid rgba(255, 255, 255, 0.06);
     outline: none;
     position: relative;
-}
-
-.team-card:hover {
-    transform: translateY(-10px) scale(1.02);
-    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.5);
-    border-color: #444;
-    border-left-color: #ffc107;
-}
-
-.team-card img {
-    width: 130px;
-    height: 130px;
-    border-radius: 50%;
-    margin-bottom: 20px;
-    border: 4px solid #ffc107;
-    transition: transform 0.4s ease, box-shadow 0.4s ease;
-    box-shadow: 0 0 15px rgba(255, 193, 7, 0.3);
-}
-
-.team-card:hover img {
-    transform: scale(1.1);
-    box-shadow: 0 0 25px rgba(255, 193, 7, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
 }
 
 .team-card::before {
     content: "";
     position: absolute;
-    inset: 0;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 193, 7, 0.12);
+    inset: -1px;
+    border-radius: 24px;
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.28), rgba(0, 209, 178, 0.18), rgba(255, 99, 132, 0.18));
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.45s ease;
     pointer-events: none;
+    filter: blur(0px);
 }
-.team-card:hover::before { opacity: 1; }
+
+.team-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 22px 50px rgba(0, 0, 0, 0.55);
+}
+.team-card:hover::before { opacity: 0.22; }
+
+.team-card img {
+    width: 132px;
+    height: 132px;
+    border-radius: 50%;
+    border: 4px solid rgba(255, 193, 7, 0.55);
+    box-shadow: 0 0 20px rgba(255, 193, 7, 0.4);
+    transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+}
+
+.team-card:hover img {
+    transform: scale(1.08);
+    box-shadow: 0 0 28px rgba(255, 193, 7, 0.6);
+    border-color: rgba(255, 193, 7, 0.9);
+}
+
+.team-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-weight: 600;
+    background: rgba(255, 193, 7, 0.14);
+    color: #ffc107;
+}
+.badge-lead {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffd96b;
+}
+.badge-creative {
+    background: rgba(44, 217, 197, 0.16);
+    color: #2cd9c5;
+}
+.badge-engineering {
+    background: rgba(111, 178, 255, 0.18);
+    color: #71a7ff;
+}
 
 .team-card h4 {
     font-family: 'Montserrat', 'Arial', sans-serif;
     font-size: 1.5rem;
-    margin-bottom: 8px;
-    color: #ffc107;
+    color: #ffffff;
+    margin-bottom: 4px;
 }
 
 .team-card .team-role {
-    font-size: 0.9rem;
-    color: #aaa;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.65);
     text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 15px;
+    letter-spacing: 0.16em;
+    margin-bottom: 8px;
 }
 
 .team-card p:not(.team-role) {
-    font-size: 1rem;
-    color: #b0b0b0;
-    line-height: 1.7;
+    font-size: 0.98rem;
+    color: rgba(224, 224, 224, 0.82);
+    line-height: 1.8;
 }
 
 .projects { background: transparent; }
 
-.project-grid {
+.project-category,
+.team-category {
+    position: relative;
+    margin-bottom: 80px;
+    padding: 48px clamp(18px, 4vw, 36px);
+    background: linear-gradient(145deg, rgba(32, 32, 32, 0.95), rgba(20, 20, 20, 0.92));
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 24px 55px rgba(0, 0, 0, 0.35);
+    overflow: hidden;
+}
+
+.project-category::before,
+.project-category::after,
+.team-category::before,
+.team-category::after {
+    content: "";
+    position: absolute;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(255, 193, 7, 0.12) 0%, transparent 70%);
+    filter: blur(0px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.project-category::before,
+.team-category::before { top: -80px; right: -120px; }
+
+.project-category::after,
+.team-category::after {
+    bottom: -120px;
+    left: -120px;
+    background: radial-gradient(ellipse at center, rgba(0, 209, 178, 0.12) 0%, transparent 70%);
+}
+
+.category-popular::before {
+    background: radial-gradient(ellipse at center, rgba(255, 193, 7, 0.18) 0%, transparent 70%);
+}
+.category-popular::after {
+    background: radial-gradient(ellipse at center, rgba(255, 111, 0, 0.14) 0%, transparent 70%);
+}
+
+.category-new::before {
+    background: radial-gradient(ellipse at center, rgba(44, 217, 197, 0.18) 0%, transparent 70%);
+}
+.category-new::after {
+    background: radial-gradient(ellipse at center, rgba(98, 102, 255, 0.18) 0%, transparent 70%);
+}
+
+.category-eol::before {
+    background: radial-gradient(ellipse at center, rgba(255, 99, 132, 0.18) 0%, transparent 70%);
+}
+.category-eol::after {
+    background: radial-gradient(ellipse at center, rgba(255, 193, 7, 0.12) 0%, transparent 70%);
+}
+
+.category-lead::before {
+    background: radial-gradient(ellipse at center, rgba(255, 193, 7, 0.2) 0%, transparent 70%);
+}
+.category-lead::after {
+    background: radial-gradient(ellipse at center, rgba(255, 111, 0, 0.16) 0%, transparent 70%);
+}
+
+.category-creative::before {
+    background: radial-gradient(ellipse at center, rgba(98, 102, 255, 0.18) 0%, transparent 70%);
+}
+.category-creative::after {
+    background: radial-gradient(ellipse at center, rgba(44, 217, 197, 0.18) 0%, transparent 70%);
+}
+
+.category-engineering::before {
+    background: radial-gradient(ellipse at center, rgba(111, 178, 255, 0.18) 0%, transparent 70%);
+}
+.category-engineering::after {
+    background: radial-gradient(ellipse at center, rgba(255, 193, 7, 0.14) 0%, transparent 70%);
+}
+
+.project-category:last-of-type {
+    margin-bottom: 0;
+}
+
+.category-header {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    margin-bottom: 36px;
     display: flex;
     flex-direction: column;
-    gap: 35px;
+    gap: 14px;
+    align-items: center;
+}
+
+.category-header h3 {
+    font-family: 'Montserrat', 'Arial', sans-serif;
+    font-size: clamp(2.2rem, 4vw, 2.6rem);
+    color: #ffffff;
+    letter-spacing: 0.04em;
+}
+
+.category-header p {
+    font-size: 1rem;
+    color: rgba(224, 224, 224, 0.85);
+    max-width: 640px;
+}
+
+.project-grid,
+.team-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 28px;
+    align-items: stretch;
 }
 
 .project-card {
-    background: #202020;
-    border-radius: 12px;
+    background: radial-gradient(circle at top, rgba(255, 193, 7, 0.07) 0%, rgba(32, 32, 32, 0.85) 45%, rgba(20, 20, 20, 0.95) 100%);
+    border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.35s ease;
     display: flex;
     flex-direction: column;
-    border: none;
+    height: 100%;
     outline: none;
     position: relative;
     will-change: transform, box-shadow;
@@ -476,6 +617,8 @@ html::-webkit-scrollbar {
     opacity: 0.9;
     will-change: transform, opacity;
     transform: translateZ(0);
+    border-radius: 20px 20px 0 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .project-card:hover img {
@@ -494,6 +637,36 @@ html::-webkit-scrollbar {
 
 .project-card-content > div:first-child {
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.project-status {
+    display: inline-block;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.status-popular {
+    background: rgba(255, 193, 7, 0.16);
+    color: #ffc107;
+}
+
+.status-new {
+    background: rgba(0, 209, 178, 0.16);
+    color: #2cd9c5;
+}
+
+.status-eol {
+    background: rgba(255, 99, 132, 0.16);
+    color: #ff6b8a;
 }
 
 .project-card h3 {
@@ -515,19 +688,12 @@ html::-webkit-scrollbar {
 .project-card:hover,
 .project-card:focus,
 .project-card:active,
-.project-card:focus-within,
-.team-card,
-.team-card:hover,
-.team-card:focus,
-.team-card:active,
-.team-card:focus-within {
+.project-card:focus-within {
     outline: none !important;
     border: none !important;
 }
 .project-card::before,
-.project-card:hover::before,
-.team-card::before,
-.team-card:hover::before {
+.project-card:hover::before {
     content: none !important;
     opacity: 0 !important;
     border: 0 !important;
@@ -791,69 +957,17 @@ footer p {
 }
 
 @media (min-width: 769px) {
-    .project-card {
-        display: grid;
-        grid-template-columns: minmax(280px, 34%) 1fr;
-        align-items: stretch;
-        height: var(--project-card-h, 360px);
+    .project-category,
+    .team-category {
+        padding: 56px clamp(28px, 5vw, 48px);
     }
-    .project-card img {
-        height: 100%;
-        width: 100%;
-        aspect-ratio: auto;
-        align-self: stretch;
-        justify-self: stretch;
 
-        -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,1) 88%, rgba(0,0,0,0) 100%);
-        mask-image: linear-gradient(to right, rgba(0,0,0,1) 88%, rgba(0,0,0,0) 100%);
+    .project-grid,
+    .team-grid {
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     }
+
     .project-card-content {
-        padding: 26px;
-        overflow: hidden;
-        min-height: 0;
-        min-width: 0;
-        display: grid;
-        grid-template-rows: minmax(0, 1fr) auto;
-        row-gap: 12px;
+        padding: 30px;
     }
-
-    .project-card-content > div:first-child {
-        min-height: 0;
-        display: grid;
-        align-content: center;
-        justify-items: center;
-        text-align: center;
-        gap: 8px;
-    }
-
-    .project-card p {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        overflow-wrap: anywhere;
-        line-height: 1.6;
-        max-height: calc(1.6em * 2);
-        margin-bottom: 0;
-    }
-
-    .project-card h3 {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        line-height: 1.25;
-        max-height: calc(1.25em * 2);
-        margin-bottom: 8px;
-    }
-    .project-buttons {
-        margin-top: 0;
-        gap: 12px;
-        justify-content: center;
-        align-items: center;
-        flex-wrap: wrap;
-        min-height: 44px;
-        width: 100%;
-    }
-    .project-buttons .btn { white-space: nowrap; }
 }
