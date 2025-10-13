@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const https = require('https');
 const morgan = require('morgan');
 const compression = require('compression');
 const helmet = require('helmet');
@@ -9,6 +10,95 @@ const rateLimit = require('express-rate-limit');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const isProd = process.env.NODE_ENV === 'production';
+
+const projectReleaseRepos = {
+    puro: 'norbertbaricz/Puro',
+    serverLauncher: 'norbertbaricz/Server-Launcher',
+    skypixelWebsite: 'norbertbaricz/Skypixel',
+    dakotaAc: 'norbertbaricz/DakotaAC'
+};
+const releaseCache = new Map();
+const RELEASE_CACHE_TTL = 15 * 60 * 1000;
+
+function fetchFromGitHub(url) {
+    return new Promise((resolve, reject) => {
+        const request = https.request(
+            url,
+            {
+                method: 'GET',
+                headers: {
+                    Accept: 'application/vnd.github.v3+json',
+                    'User-Agent': 'Skypixel-App'
+                },
+                timeout: 7000
+            },
+            res => {
+                let rawData = '';
+                res.setEncoding('utf8');
+                res.on('data', chunk => {
+                    rawData += chunk;
+                });
+                res.on('end', () => {
+                    if (res.statusCode && res.statusCode >= 400) {
+                        const error = new Error(`GitHub responded with status ${res.statusCode}`);
+                        error.statusCode = res.statusCode;
+                        error.body = rawData;
+                        reject(error);
+                        return;
+                    }
+                    try {
+                        const data = rawData ? JSON.parse(rawData) : {};
+                        resolve(data);
+                    } catch (parseError) {
+                        reject(parseError);
+                    }
+                });
+            }
+        );
+
+        request.on('timeout', () => {
+            request.destroy(new Error('GitHub request timed out'));
+        });
+        request.on('error', reject);
+        request.end();
+    });
+}
+
+async function getLatestRelease(repo) {
+    if (!repo) return null;
+
+    const cached = releaseCache.get(repo);
+    if (cached && cached.expires > Date.now()) {
+        return cached.version;
+    }
+
+    const url = `https://api.github.com/repos/${repo}/releases/latest`;
+    try {
+        const release = await fetchFromGitHub(url);
+        const version = release?.tag_name || release?.name || null;
+        releaseCache.set(repo, { version, expires: Date.now() + RELEASE_CACHE_TTL });
+        return version;
+    } catch (error) {
+        if (error.statusCode === 404) {
+            releaseCache.set(repo, { version: null, expires: Date.now() + RELEASE_CACHE_TTL });
+            return null;
+        }
+        if (!isProd) {
+            console.error(`Failed to load release for ${repo}:`, error.message || error);
+        }
+        return null;
+    }
+}
+
+async function loadProjectReleases() {
+    const releases = await Promise.all(
+        Object.entries(projectReleaseRepos).map(async ([key, repo]) => {
+            const version = await getLatestRelease(repo);
+            return [key, version];
+        })
+    );
+    return Object.fromEntries(releases);
+}
 
 if (process.env.TRUST_PROXY) {
     app.set('trust proxy', process.env.TRUST_PROXY === 'true' ? 1 : Number(process.env.TRUST_PROXY) || 0);
@@ -121,8 +211,16 @@ app.get('/', (req, res) => {
     res.render('index', { title: 'Welcome to Skypixel!' });
 });
 
-app.get('/projects', (req, res) => {
-    res.render('projects', { title: 'Our Projects - Skypixel' });
+app.get('/projects', async (req, res, next) => {
+    try {
+        const releaseVersions = await loadProjectReleases();
+        res.render('projects', {
+            title: 'Our Projects - Skypixel',
+            releaseVersions
+        });
+    } catch (error) {
+        next(error);
+    }
 });
 
 app.get('/about', (req, res) => {

@@ -7,11 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const projectTagElem = document.getElementById('popup-project-tag');
     const projectImageElem = document.getElementById('project-image');
 
-    if (!popup || !closeBtn || !projectDescriptionElem || !projectTitleElem) {
-        console.error("Popup elements not found. Pop-up functionality will be disabled.");
-        return;
-    }
-
     const projectData = {
         1: {
             title: "Puro Discord Bot",
@@ -45,44 +40,49 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    function openProjectPopup(projectId) {
-        const projectInfo = projectData[projectId];
-        if (projectInfo) {
-            projectTitleElem.textContent = projectInfo.title;
-            projectDescriptionElem.textContent = projectInfo.description;
-            if (projectTagElem) projectTagElem.textContent = projectInfo.tag || '';
-            if (projectImageElem && projectInfo.image) {
-                projectImageElem.src = projectInfo.image;
-                projectImageElem.alt = projectInfo.title;
-                projectImageElem.decoding = 'async';
-                projectImageElem.loading = 'eager';
+    if (popup && closeBtn && projectDescriptionElem && projectTitleElem) {
+        const openProjectPopup = (projectId) => {
+            const projectInfo = projectData[projectId];
+            if (projectInfo) {
+                projectTitleElem.textContent = projectInfo.title;
+                projectDescriptionElem.textContent = projectInfo.description;
+                if (projectTagElem) projectTagElem.textContent = projectInfo.tag || '';
+                if (projectImageElem && projectInfo.image) {
+                    projectImageElem.src = projectInfo.image;
+                    projectImageElem.alt = projectInfo.title;
+                    projectImageElem.decoding = 'async';
+                    projectImageElem.loading = 'eager';
+                }
+            } else {
+                projectTitleElem.textContent = "Details Unavailable";
+                projectDescriptionElem.textContent = "Details for this project are not available yet or the project ID is incorrect.";
+                if (projectTagElem) projectTagElem.textContent = '';
             }
-        } else {
-            projectTitleElem.textContent = "Details Unavailable";
-            projectDescriptionElem.textContent = "Details for this project are not available yet or the project ID is incorrect.";
-            if (projectTagElem) projectTagElem.textContent = '';
-        }
-        popup.classList.add('visible');
-        document.body.style.overflow = 'hidden';
-    }
+            popup.classList.add('visible');
+            document.body.style.overflow = 'hidden';
+        };
 
-    function closeProjectPopup() {
-        popup.classList.remove('visible');
-        document.body.style.overflow = '';
-    }
+        const closeProjectPopup = () => {
+            popup.classList.remove('visible');
+            document.body.style.overflow = '';
+        };
 
-    projectDetailButtons.forEach(button => {
-        button.addEventListener('click', (event) => {
-            event.preventDefault();
-            const projectId = button.getAttribute('data-project');
-            openProjectPopup(projectId);
+        projectDetailButtons.forEach((button) => {
+            button.addEventListener('click', (event) => {
+                event.preventDefault();
+                const projectId = button.getAttribute('data-project');
+                openProjectPopup(projectId);
+            });
         });
-    });
 
-    closeBtn.addEventListener('click', closeProjectPopup);
-    popup.addEventListener('click', (event) => {
-        if (event.target === popup) {
-            closeProjectPopup();
-        }
-    });
+        closeBtn.addEventListener('click', closeProjectPopup);
+        popup.addEventListener('click', (event) => {
+            if (event.target === popup) {
+                closeProjectPopup();
+            }
+        });
+    } else if (projectDetailButtons.length) {
+        console.warn("Project detail popup elements not found. Pop-up functionality will be disabled.");
+    }
+
 });

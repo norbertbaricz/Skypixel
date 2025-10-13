@@ -42,14 +42,18 @@
                             <img src="/images/project1.jpg" alt="Project 1 - Puro" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/600x400/202020/e0e0e0?text=Image+Error';">
                             <div class="project-card-content">
                                 <div>
-                                    <span class="project-status status-popular">Most Popular</span>
+                                    <div class="project-meta">
+                                        <span class="project-status status-popular">Most Popular</span>
+                                        <% if (releaseVersions && releaseVersions.puro) { %>
+                                            <span class="project-version version-popular"><%= releaseVersions.puro %></span>
+                                        <% } %>
+                                    </div>
                                     <h3>Puro</h3>
                                     <p>Puro is a versatile Discord bot designed to enhance member interaction and provide robust moderation tools to secure your Discord server effectively.</p>
                                 </div>
                                 <div class="project-buttons">
                                     <a href="#" class="btn" data-project="1"><i class="fas fa-info-circle"></i> Details</a>
                                     <a href="https://github.com/norbertbaricz/Puro/releases" target="_blank" class="btn btn-secondary"><i class="fas fa-download"></i> Download</a>
-                                    <span class="btn btn-secondary disabled" role="button" aria-disabled="true" tabindex="-1"><i class="fas fa-comment-dots"></i> Feedback</span>
                                 </div>
                             </div>
                         </div>
@@ -57,14 +61,18 @@
                             <img src="/images/project3.jpg" alt="Project 3 - Server Launcher" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/600x400/202020/e0e0e0?text=Image+Error';">
                             <div class="project-card-content">
                                 <div>
-                                    <span class="project-status status-popular">Most Popular</span>
+                                    <div class="project-meta">
+                                        <span class="project-status status-popular">Most Popular</span>
+                                        <% if (releaseVersions && releaseVersions.serverLauncher) { %>
+                                            <span class="project-version version-popular"><%= releaseVersions.serverLauncher %></span>
+                                        <% } %>
+                                    </div>
                                     <h3>Server Launcher</h3>
                                     <p>The Server Launcher is a user-friendly Windows application designed to simplify the management of your home-hosted Minecraft server, making server administration straightforward and efficient.</p>
                                 </div>
                                 <div class="project-buttons">
                                     <a href="#" class="btn" data-project="3"><i class="fas fa-info-circle"></i> Details</a>
                                     <a href="https://github.com/norbertbaricz/Server-Launcher/releases" target="_blank" class="btn btn-secondary"><i class="fas fa-download"></i> Download</a>
-                                    <span class="btn btn-secondary disabled" role="button" aria-disabled="true" tabindex="-1"><i class="fas fa-comment-dots"></i> Feedback</span>
                                 </div>
                             </div>
                         </div>
@@ -81,14 +89,18 @@
                             <img src="/images/project4.jpg" alt="Skypixel Website Project" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/600x400/202020/e0e0e0?text=Image+Error';">
                             <div class="project-card-content">
                                 <div>
-                                    <span class="project-status status-new">New Release</span>
+                                    <div class="project-meta">
+                                        <span class="project-status status-new">New Release</span>
+                                        <% if (releaseVersions && releaseVersions.skypixelWebsite) { %>
+                                            <span class="project-version version-new"><%= releaseVersions.skypixelWebsite %></span>
+                                        <% } %>
+                                    </div>
                                     <h3>Skypixel Website</h3>
                                     <p>Welcome to the Skypixel website! Here, you can explore all our exciting projects and get to know the talented team behind the innovations. Dive in and discover what Skypixel has to offer!</p>
                                 </div>
                                 <div class="project-buttons">
                                     <a href="#" class="btn" data-project="4"><i class="fas fa-info-circle"></i> Details</a>
                                     <a href="https://github.com/norbertbaricz/Skypixel/releases" target="_blank" class="btn btn-secondary"><i class="fas fa-download"></i> Download</a>
-                                    <span class="btn btn-secondary disabled" role="button" aria-disabled="true" tabindex="-1"><i class="fas fa-comment-dots"></i> Feedback</span>
                                 </div>
                             </div>
                         </div>
@@ -96,14 +108,15 @@
                             <img src="/images/project5.jpg" alt="Project BoosterX" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/600x400/202020/e0e0e0?text=Image+Error';">
                             <div class="project-card-content">
                                 <div>
-                                    <span class="project-status status-new">New Release</span>
+                                    <div class="project-meta">
+                                        <span class="project-status status-new">New Release</span>
+                                    </div>
                                     <h3>BoosterX</h3>
                                     <p>BoosterX is a state-of-the-art optimization tool designed to maximize your system's performance and ensure a smoother, more responsive experience.</p>
                                 </div>
                                 <div class="project-buttons">
                                     <a href="#" class="btn" data-project="5"><i class="fas fa-info-circle"></i> Details</a>
                                     <a href="#" class="btn btn-secondary disabled"><i class="fas fa-download"></i> Download</a>
-                                    <span class="btn btn-secondary disabled" role="button" aria-disabled="true" tabindex="-1"><i class="fas fa-comment-dots"></i> Feedback</span>
                                 </div>
                             </div>
                         </div>
@@ -120,14 +133,18 @@
                             <img src="/images/project2.jpg" alt="Project 2 - DakotaAC" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/600x400/202020/e0e0e0?text=Image+Error';">
                             <div class="project-card-content">
                                 <div>
-                                    <span class="project-status status-eol">End of Life</span>
+                                    <div class="project-meta">
+                                        <span class="project-status status-eol">End of Life</span>
+                                        <% if (releaseVersions && releaseVersions.dakotaAc) { %>
+                                            <span class="project-version version-eol"><%= releaseVersions.dakotaAc %></span>
+                                        <% } %>
+                                    </div>
                                     <h3>DakotaAC</h3>
                                     <p>DakotaAC reached its final release, but the archive remains for server owners who still need the classic Minecraft anti-cheat toolkit.</p>
                                 </div>
                                 <div class="project-buttons">
                                     <a href="#" class="btn" data-project="2"><i class="fas fa-info-circle"></i> Details</a>
                                     <a href="https://github.com/norbertbaricz/DakotaAC/releases" target="_blank" class="btn btn-secondary"><i class="fas fa-archive"></i> Archive</a>
-                                    <span class="btn btn-secondary disabled" role="button" aria-disabled="true" tabindex="-1"><i class="fas fa-comment-dots"></i> Feedback</span>
                                 </div>
                             </div>
                         </div>

@@ -436,7 +436,7 @@ html::-webkit-scrollbar {
 .team-card h4 {
     font-family: 'Montserrat', 'Arial', sans-serif;
     font-size: 1.5rem;
-    color: #ffffff;
+    color: #ffc107;
     margin-bottom: 4px;
 }
 
@@ -643,6 +643,15 @@ html::-webkit-scrollbar {
     gap: 12px;
 }
 
+.project-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
 .project-status {
     display: inline-block;
     font-size: 0.72rem;
@@ -651,7 +660,35 @@ html::-webkit-scrollbar {
     padding: 6px 14px;
     border-radius: 999px;
     font-weight: 600;
-    margin-bottom: 16px;
+    margin: 0;
+}
+
+.project-meta .project-version {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #0b1120;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+.project-meta .project-version.version-popular {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.4) 0%, rgba(255, 153, 18, 0.8) 100%);
+    color: #1f1400;
+    box-shadow: 0 4px 16px rgba(255, 153, 18, 0.3);
+}
+.project-meta .project-version.version-new {
+    background: linear-gradient(135deg, rgba(0, 209, 178, 0.25) 0%, rgba(35, 231, 168, 0.85) 100%);
+    color: #03120f;
+    box-shadow: 0 4px 16px rgba(44, 217, 197, 0.3);
+}
+.project-meta .project-version.version-eol {
+    background: linear-gradient(135deg, rgba(255, 99, 132, 0.3) 0%, rgba(255, 99, 132, 0.85) 100%);
+    color: #1f0508;
+    box-shadow: 0 4px 16px rgba(255, 99, 132, 0.35);
 }
 
 .status-popular {
