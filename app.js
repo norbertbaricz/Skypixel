@@ -17,9 +17,6 @@ const projectReleaseRepos = {
     skypixelWebsite: 'norbertbaricz/Skypixel',
     dakotaAc: 'norbertbaricz/DakotaAC'
 };
-const releaseCache = new Map();
-const RELEASE_CACHE_TTL = 15 * 60 * 1000;
-
 function fetchFromGitHub(url) {
     return new Promise((resolve, reject) => {
         const request = https.request(
@@ -67,20 +64,13 @@ function fetchFromGitHub(url) {
 async function getLatestRelease(repo) {
     if (!repo) return null;
 
-    const cached = releaseCache.get(repo);
-    if (cached && cached.expires > Date.now()) {
-        return cached.version;
-    }
-
     const url = `https://api.github.com/repos/${repo}/releases/latest`;
     try {
         const release = await fetchFromGitHub(url);
         const version = release?.tag_name || release?.name || null;
-        releaseCache.set(repo, { version, expires: Date.now() + RELEASE_CACHE_TTL });
         return version;
     } catch (error) {
         if (error.statusCode === 404) {
-            releaseCache.set(repo, { version: null, expires: Date.now() + RELEASE_CACHE_TTL });
             return null;
         }
         if (!isProd) {
