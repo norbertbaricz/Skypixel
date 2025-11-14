@@ -105,12 +105,6 @@ npm run lint
 ```
 Checks code quality with ESLint.
 
-### Testing
-```bash
-npm test
-```
-Runs test suite with Jest.
-
 ## 📁 Project Structure
 
 ```
@@ -183,6 +177,7 @@ Skypixel/
 | `NODE_ENV` | Environment mode | development | No |
 | `TRUST_PROXY` | Enable trust proxy | false | No |
 | `GITHUB_TOKEN` | GitHub API token | - | No* |
+| `GITHUB_TIMEOUT_MS` | GitHub fetch timeout (ms) | 7000 | No |
 
 *Optional but recommended for higher API rate limits (60 → 5000 requests/hour)
 

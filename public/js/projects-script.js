@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const projectDetailButtons = document.querySelectorAll('.project-buttons .btn[data-project]');
     const popup = document.getElementById('project-popup');
     const closeBtn = popup?.querySelector('.close-btn');
     const projectDescriptionElem = document.getElementById('project-description');
@@ -90,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 closeProjectPopup();
             }
         });
-    } else if (projectDetailButtons.length) {
+    } else if (document.querySelector('.project-buttons .btn[data-project]')) {
         console.warn("Project detail popup elements not found. Pop-up functionality will be disabled.");
     }
 

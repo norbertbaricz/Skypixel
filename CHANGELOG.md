@@ -2,6 +2,20 @@
 
 All notable changes to the Skypixel project will be documented in this file.
 
+## [Unreleased]
+
+### ✅ Added
+- `.eslintrc.json` to share a single linting rule-set between the server (Node.js) and client scripts.
+- `.env.example` template including the optional `GITHUB_TIMEOUT_MS` variable for faster onboarding.
+
+### ♻️ Changed
+- GitHub release fetching now relies on the native `fetch` API with abortable requests, optional personal access tokens, and configurable timeouts.
+- README environment table updated with the new timeout variable and the docs now focus on linting as the current quality gate.
+
+### 🗑️ Removed
+- Jest dev dependency and the `npm test` script, since no automated tests exist yet (keeping installs leaner).
+- Orphaned `node_modules/.package-lock.json` artifact that was accidentally tracked.
+
 ## [1.1.0] - 2025-11-14
 
 ### 🚀 Added

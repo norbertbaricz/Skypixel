@@ -1,6 +1,5 @@
 const express = require('express');
 const path = require('path');
-const https = require('https');
 const morgan = require('morgan');
 const compression = require('compression');
 const helmet = require('helmet');
@@ -9,6 +8,10 @@ const rateLimit = require('express-rate-limit');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const isProd = process.env.NODE_ENV === 'production';
+
+if (typeof fetch !== 'function') {
+    throw new Error('Global fetch API is unavailable. Upgrade Node.js to v18 or newer.');
+}
 
 const projectReleaseRepos = {
     puro: 'norbertbaricz/Puro',
@@ -19,48 +22,50 @@ const projectReleaseRepos = {
 
 const releaseCache = new Map();
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes cache
-function fetchFromGitHub(url) {
-    return new Promise((resolve, reject) => {
-        const request = https.request(
-            url,
-            {
-                method: 'GET',
-                headers: {
-                    Accept: 'application/vnd.github.v3+json',
-                    'User-Agent': 'Skypixel-App'
-                },
-                timeout: 7000
-            },
-            res => {
-                let rawData = '';
-                res.setEncoding('utf8');
-                res.on('data', chunk => {
-                    rawData += chunk;
-                });
-                res.on('end', () => {
-                    if (res.statusCode && res.statusCode >= 400) {
-                        const error = new Error(`GitHub responded with status ${res.statusCode}`);
-                        error.statusCode = res.statusCode;
-                        error.body = rawData;
-                        reject(error);
-                        return;
-                    }
-                    try {
-                        const data = rawData ? JSON.parse(rawData) : {};
-                        resolve(data);
-                    } catch (parseError) {
-                        reject(parseError);
-                    }
-                });
-            }
-        );
+const GITHUB_TIMEOUT_MS = Number(process.env.GITHUB_TIMEOUT_MS) || 7000;
 
-        request.on('timeout', () => {
-            request.destroy(new Error('GitHub request timed out'));
+function buildGitHubHeaders() {
+    const headers = {
+        Accept: 'application/vnd.github.v3+json',
+        'User-Agent': 'Skypixel-App'
+    };
+
+    if (process.env.GITHUB_TOKEN) {
+        headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+    }
+
+    return headers;
+}
+
+async function fetchFromGitHub(url) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), GITHUB_TIMEOUT_MS);
+
+    try {
+        const response = await fetch(url, {
+            headers: buildGitHubHeaders(),
+            signal: controller.signal
         });
-        request.on('error', reject);
-        request.end();
-    });
+
+        if (!response.ok) {
+            const error = new Error(`GitHub responded with status ${response.status}`);
+            error.statusCode = response.status;
+            error.body = await response.text();
+            throw error;
+        }
+
+        const rawData = await response.text();
+        return rawData ? JSON.parse(rawData) : {};
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            const timeoutError = new Error('GitHub request timed out');
+            timeoutError.code = 'GITHUB_TIMEOUT';
+            throw timeoutError;
+        }
+        throw error;
+    } finally {
+        clearTimeout(timeoutId);
+    }
 }
 
 async function getLatestRelease(repo) {
