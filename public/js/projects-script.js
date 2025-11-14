@@ -67,17 +67,26 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.style.overflow = '';
         };
 
-        projectDetailButtons.forEach((button) => {
-            button.addEventListener('click', (event) => {
+        // Use event delegation for better performance
+        document.addEventListener('click', (event) => {
+            const button = event.target.closest('.project-buttons .btn[data-project]');
+            if (button) {
                 event.preventDefault();
                 const projectId = button.getAttribute('data-project');
                 openProjectPopup(projectId);
-            });
+            }
         });
 
         closeBtn.addEventListener('click', closeProjectPopup);
         popup.addEventListener('click', (event) => {
             if (event.target === popup) {
+                closeProjectPopup();
+            }
+        });
+        
+        // Close popup on Escape key
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && popup.classList.contains('visible')) {
                 closeProjectPopup();
             }
         });

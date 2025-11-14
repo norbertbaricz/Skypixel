@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const textToAnimate = "Skypixel";
     let continueTypingAnimation = true;
+    let typingTimeout = null;
 
     function animateLoadingText() {
         if (!continueTypingAnimation || !loadingTextElement) return;
@@ -19,27 +20,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function type() {
             if (!continueTypingAnimation) {
-                 if (loadingTextElement) loadingTextElement.textContent = textToAnimate;
-                 return;
+                if (loadingTextElement) loadingTextElement.textContent = textToAnimate;
+                return;
             }
 
             if (isErasing) {
                 if (loadingTextElement.textContent.length > 0) {
                     loadingTextElement.textContent = textToAnimate.substring(0, loadingTextElement.textContent.length - 1);
-                    setTimeout(type, 90);
+                    typingTimeout = setTimeout(type, 90);
                 } else {
                     isErasing = false;
                     currentCharIndex = 0;
-                    setTimeout(type, 500);
+                    typingTimeout = setTimeout(type, 500);
                 }
             } else {
                 if (currentCharIndex < textToAnimate.length) {
                     loadingTextElement.textContent += textToAnimate.charAt(currentCharIndex);
                     currentCharIndex++;
-                    setTimeout(type, 150);
+                    typingTimeout = setTimeout(type, 150);
                 } else {
                     isErasing = true;
-                    setTimeout(type, 2000);
+                    typingTimeout = setTimeout(type, 2000);
                 }
             }
         }
@@ -48,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showWebsiteContent() {
         continueTypingAnimation = false;
+        if (typingTimeout) clearTimeout(typingTimeout);
 
         if (loaderWrapper) {
             loaderWrapper.classList.add('hidden');
@@ -95,16 +97,22 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const animatedElements = document.querySelectorAll('.fade-in-scroll');
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-                observer.unobserve(entry.target);
-            }
+    if (animatedElements.length > 0) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { 
+            threshold: 0.01, 
+            rootMargin: '0px 0px 12% 0px'
         });
-    }, { threshold: 0.01, rootMargin: '0px 0px 12% 0px' });
-    animatedElements.forEach((el) => {
-        el.style.transitionDelay = '';
-        observer.observe(el);
-    });
+        
+        animatedElements.forEach((el) => {
+            el.style.transitionDelay = '';
+            observer.observe(el);
+        });
+    }
 });

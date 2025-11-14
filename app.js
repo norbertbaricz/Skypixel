@@ -1,6 +1,5 @@
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
 const https = require('https');
 const morgan = require('morgan');
 const compression = require('compression');
@@ -17,6 +16,9 @@ const projectReleaseRepos = {
     skypixelWebsite: 'norbertbaricz/Skypixel',
     dakotaAc: 'norbertbaricz/DakotaAC'
 };
+
+const releaseCache = new Map();
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes cache
 function fetchFromGitHub(url) {
     return new Promise((resolve, reject) => {
         const request = https.request(
@@ -64,10 +66,23 @@ function fetchFromGitHub(url) {
 async function getLatestRelease(repo) {
     if (!repo) return null;
 
+    // Check cache first
+    const cached = releaseCache.get(repo);
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+        return cached.version;
+    }
+
     const url = `https://api.github.com/repos/${repo}/releases/latest`;
     try {
         const release = await fetchFromGitHub(url);
         const version = release?.tag_name || release?.name || null;
+        
+        // Store in cache
+        releaseCache.set(repo, {
+            version,
+            timestamp: Date.now()
+        });
+        
         return version;
     } catch (error) {
         if (error.statusCode === 404) {
@@ -217,26 +232,33 @@ app.get('/about', (req, res) => {
     res.render('about', { title: 'About Us - Skypixel' });
 });
 
-app.get('/serverlauncher', (req, res) => {
-    const filePath = path.join(__dirname, 'views', 'serverlauncher.html');
-    if (fs.existsSync(filePath)) {
-        res.sendFile(filePath);
-    } else {
-        res.status(404).send('Server Launcher page not found.');
-    }
-});
-
 app.use((req, res) => {
     res.status(404).send('Not Found');
 });
 
 app.use((err, req, res, _next) => {
-    if (process.env.NODE_ENV !== 'production') {
-        console.error(err);
-    }
-    res.status(500).send('Internal Server Error');
+    console.error('Server Error:', {
+        message: err.message,
+        stack: isProd ? undefined : err.stack,
+        path: req.path,
+        method: req.method,
+        timestamp: new Date().toISOString()
+    });
+    res.status(err.status || 500).send(isProd ? 'Internal Server Error' : err.message);
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+const server = app.listen(PORT, () => {
+    console.log(`
+🚀 Skypixel Server Started Successfully`);
+    console.log(`📍 Environment: ${isProd ? 'Production' : 'Development'}`);
+    console.log(`🌐 Server: http://localhost:${PORT}`);
+    console.log(`⏰ Started at: ${new Date().toISOString()}\n`);
+});
+
+process.on('SIGTERM', () => {
+    console.log('SIGTERM received, closing server gracefully...');
+    server.close(() => {
+        console.log('Server closed');
+        process.exit(0);
+    });
 });

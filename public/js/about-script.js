@@ -79,16 +79,25 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.style.overflow = '';
   }
 
-  document.querySelectorAll('.team-card .btn[data-team]').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
+  // Event delegation for better performance
+  document.addEventListener('click', (e) => {
+    const teamBtn = e.target.closest('.team-card .btn[data-team]');
+    if (teamBtn) {
       e.preventDefault();
-      const id = btn.getAttribute('data-team');
+      const id = teamBtn.getAttribute('data-team');
       openPopup(id);
-    });
+    }
   });
 
   closeBtn.addEventListener('click', closePopup);
   popup.addEventListener('click', (e) => {
     if (e.target === popup) closePopup();
+  });
+
+  // Keyboard support
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && popup.classList.contains('visible')) {
+      closePopup();
+    }
   });
 });

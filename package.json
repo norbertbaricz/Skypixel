@@ -1,13 +1,26 @@
 {
   "name": "skypixel",
-  "version": "1.0.8",
-  "description": "A short description of your website.",
+  "version": "1.1.0",
+  "description": "Skypixel official website - Explore our creative projects and meet our talented team.",
   "author": "MaxUltimat3",
   "main": "app.js",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
   "scripts": {
     "start": "NODE_ENV=production node app.js",
-    "dev": "nodemon --inspect --verbose --watch . --trace-warnings app.js"
+    "dev": "nodemon --inspect --verbose --watch . --trace-warnings app.js",
+    "lint": "eslint .",
+    "test": "jest"
   },
+  "keywords": [
+    "portfolio",
+    "projects",
+    "discord-bot",
+    "minecraft",
+    "website"
+  ],
   "dependencies": {
     "compression": "^1.8.1",
     "ejs": "^3.1.10",
