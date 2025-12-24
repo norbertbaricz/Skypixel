@@ -23,6 +23,14 @@ const projectReleaseRepos = {
 const releaseCache = new Map();
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes cache
 const GITHUB_TIMEOUT_MS = Number(process.env.GITHUB_TIMEOUT_MS) || 7000;
+const RELEASE_REFRESH_MS = Number(process.env.RELEASE_REFRESH_MS) || CACHE_TTL;
+
+// Keep a simple in-memory snapshot so the /projects page renders quickly without waiting on GitHub
+const releaseSnapshot = {
+    data: null,
+    fetchedAt: 0,
+    inFlight: null
+};
 
 function buildGitHubHeaders() {
     const headers = {
@@ -108,6 +116,42 @@ async function loadProjectReleases() {
         })
     );
     return Object.fromEntries(releases);
+}
+
+async function refreshReleaseSnapshot(force = false) {
+    const isFresh = Date.now() - releaseSnapshot.fetchedAt < CACHE_TTL;
+    if (!force && isFresh && releaseSnapshot.data) {
+        return releaseSnapshot.data;
+    }
+
+    if (releaseSnapshot.inFlight) {
+        return releaseSnapshot.inFlight;
+    }
+
+    releaseSnapshot.inFlight = loadProjectReleases()
+        .then((data) => {
+            releaseSnapshot.data = data;
+            releaseSnapshot.fetchedAt = Date.now();
+            return data;
+        })
+        .catch((error) => {
+            if (!isProd) {
+                console.error('Failed to refresh release snapshot:', error.message || error);
+            }
+            return releaseSnapshot.data;
+        })
+        .finally(() => {
+            releaseSnapshot.inFlight = null;
+        });
+
+    return releaseSnapshot.inFlight;
+}
+
+function scheduleReleaseRefresh() {
+    if (RELEASE_REFRESH_MS <= 0) return;
+    setInterval(() => {
+        refreshReleaseSnapshot(true).catch(() => {});
+    }, RELEASE_REFRESH_MS).unref();
 }
 
 if (process.env.TRUST_PROXY) {
@@ -217,13 +261,17 @@ try {
     app.locals.assetVersion = Date.now().toString();
 }
 
+// Pre-warm release data so the first /projects render is fast, then keep it fresh on an interval
+refreshReleaseSnapshot(true).catch(() => {});
+scheduleReleaseRefresh();
+
 app.get('/', (req, res) => {
     res.render('index', { title: 'Welcome to Skypixel!' });
 });
 
 app.get('/projects', async (req, res, next) => {
     try {
-        const releaseVersions = await loadProjectReleases();
+        const releaseVersions = await refreshReleaseSnapshot();
         res.render('projects', {
             title: 'Our Projects - Skypixel',
             releaseVersions
