@@ -37,112 +37,74 @@
         </nav>
         <section id="about" class="about section-padding fade-in-scroll">
             <div class="container">
-                <h2>About Skypixel</h2>
-                <p>Skypixel was formed by a passionate team of developers and creators who share a common goal: to build innovative and impactful projects.</p>
-                <h3 class="team-section-heading">Meet the Team</h3>
+                <h2>MEET THE TEAM</h2>
 
-                <div class="team-category category-lead">
-                    <div class="category-header">
-                        <h3>Leadership & Direction</h3>
-                        <p>Guiding Skypixel’s roadmap, keeping features sharp, and making sure every release stays true to our community heartbeat.</p>
-                    </div>
-                    <div class="team-grid">
-                        <div class="team-card fade-in-scroll">
-                            <img src="/images/team1.jpg" alt="Team Member 1 - MaxUltimat3" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/200x200/252525/e0e0e0?text=Image+Error';">
-                            <span class="team-badge badge-lead">Leadership</span>
-                            <h4>MaxUltimat3</h4>
-                            <p class="team-role">Lead Developer</p>
-                            <p>Max orchestrates product direction, architecting scalable systems and ensuring every Skypixel project delivers world-class performance.</p>
-                            <div class="project-buttons">
-                                <a href="#" class="btn" data-team="1"><i class="fas fa-info-circle"></i> Details</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <% const teamCategories = teamData?.categories || { creator: [], contributors: [] }; %>
 
-                <div class="team-category category-creative">
-                    <div class="category-header">
-                        <h3>Creative Experience</h3>
-                        <p>Designing interfaces and experiences that feel effortless, intuitive, and distinctly Skypixel.</p>
-                    </div>
-                    <div class="team-grid">
-                        <div class="team-card fade-in-scroll" style="animation-delay: 0.2s;">
-                            <img src="/images/team2.jpg" alt="Team Member 2 - Shinigvmi" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/200x200/252525/e0e0e0?text=Image+Error';">
-                            <span class="team-badge badge-creative">UX / UI</span>
-                            <h4>Shinigvmi</h4>
-                            <p class="team-role">UI/UX Designer</p>
-                            <p>Andy shapes user journeys with refined visual systems and accessible layouts that put clarity and delight first.</p>
-                            <div class="project-buttons">
-                                <a href="#" class="btn" data-team="2"><i class="fas fa-info-circle"></i> Details</a>
-                            </div>
+                <% if (teamCategories.creator.length) { %>
+                    <div class="team-category category-lead">
+                        <div class="category-header">
+                            <h3>Creator</h3>
+                            <p>Leading the vision and shaping every Skypixel project from the ground up.</p>
                         </div>
-                        <div class="team-card fade-in-scroll" style="animation-delay: 0.35s;">
-                            <img src="/images/team6.jpg" alt="Team Member 6 - PixelPioneer" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/200x200/252525/e0e0e0?text=Image+Error';">
-                            <span class="team-badge badge-creative">Frontend</span>
-                            <h4>PixelPioneer</h4>
-                            <p class="team-role">Frontend Developer</p>
-                            <p>Pixel turns design systems into responsive, high-performance web experiences, fusing animation and accessibility best practices.</p>
-                            <div class="project-buttons">
-                                <a href="#" class="btn" data-team="6"><i class="fas fa-info-circle"></i> Details</a>
-                            </div>
+                        <div class="team-grid">
+                            <% teamCategories.creator.forEach((member, index) => { %>
+                                <div class="team-card fade-in-scroll" style="animation-delay: <%= index * 0.1 %>s;" data-team-card
+                                    data-title="<%= member.name %>"
+                                    data-role="<%= member.role %>"
+                                    data-description="<%= member.description %>"
+                                    data-image="<%= member.avatar %>"
+                                    data-url="<%= member.profileUrl %>">
+                                    <img src="<%= member.avatar %>" alt="<%= member.name %>" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/200x200/252525/e0e0e0?text=Image+Error';">
+                                    <span class="team-badge badge-lead">Creator</span>
+                                    <h4><%= member.name %></h4>
+                                    <p><%= member.description %></p>
+                                    <div class="project-buttons">
+                                        <a href="<%= member.profileUrl %>" class="btn" target="_blank" rel="noopener"><i class="fab fa-github"></i> GitHub</a>
+                                    </div>
+                                </div>
+                            <% }); %>
                         </div>
                     </div>
-                </div>
+                <% } %>
 
-                <div class="team-category category-engineering">
-                    <div class="category-header">
-                        <h3>Engineering & Intelligence</h3>
-                        <p>Building the platforms, security, and data insight that power every Skypixel launch.</p>
-                    </div>
-                    <div class="team-grid">
-                        <div class="team-card fade-in-scroll" style="animation-delay: 0.45s;">
-                            <img src="/images/team3.jpg" alt="Team Member 3 - AlexV" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/200x200/252525/e0e0e0?text=Image+Error';">
-                            <span class="team-badge badge-engineering">Backend</span>
-                            <h4>AlexV</h4>
-                            <p class="team-role">Backend Specialist</p>
-                            <p>Alex architects APIs, database layers, and infrastructure designed to scale reliably under community-sized load.</p>
-                            <div class="project-buttons">
-                                <a href="#" class="btn" data-team="3"><i class="fas fa-info-circle"></i> Details</a>
-                            </div>
+                <% if (teamCategories.contributors.length) { %>
+                    <div class="team-category category-engineering">
+                        <div class="category-header">
+                            <h3>Contributors</h3>
+                            <p>Everyone who contributed to Skypixel repositories and helped ship the projects.</p>
                         </div>
-                        <div class="team-card fade-in-scroll" style="animation-delay: 0.6s;">
-                            <img src="/images/team4.jpg" alt="Team Member 4 - CyberG" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/200x200/252525/e0e0e0?text=Image+Error';">
-                            <span class="team-badge badge-engineering">Security</span>
-                            <h4>CyberG</h4>
-                            <p class="team-role">Security Analyst</p>
-                            <p>CyberG secures the stack end-to-end, running audits, patching vulnerabilities, and hardening services against real-world threats.</p>
-                            <div class="project-buttons">
-                                <a href="#" class="btn" data-team="4"><i class="fas fa-info-circle"></i> Details</a>
-                            </div>
-                        </div>
-                        <div class="team-card fade-in-scroll" style="animation-delay: 0.75s;">
-                            <img src="/images/team5.jpg" alt="Team Member 5 - DataWiz" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/200x200/252525/e0e0e0?text=Image+Error';">
-                            <span class="team-badge badge-engineering">Data</span>
-                            <h4>DataWiz</h4>
-                            <p class="team-role">Data Scientist</p>
-                            <p>DataWiz turns telemetry into insight, shaping predictive features and reporting that keep the Skypixel ecosystem evolving.</p>
-                            <div class="project-buttons">
-                                <a href="#" class="btn" data-team="5"><i class="fas fa-info-circle"></i> Details</a>
-                            </div>
+                        <div class="team-grid">
+                            <% teamCategories.contributors.forEach((member, index) => { %>
+                                <div class="team-card fade-in-scroll" style="animation-delay: <%= (index + 2) * 0.1 %>s;" data-team-card
+                                    data-title="<%= member.name %>"
+                                    data-role="<%= member.role %>"
+                                    data-description="<%= member.description %>"
+                                    data-image="<%= member.avatar %>"
+                                    data-url="<%= member.profileUrl %>">
+                                    <img src="<%= member.avatar %>" alt="<%= member.name %>" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/200x200/252525/e0e0e0?text=Image+Error';">
+                                    <span class="team-badge badge-engineering">Contributor</span>
+                                    <h4><%= member.name %></h4>
+                                    <p><%= member.description %></p>
+                                    <div class="project-buttons">
+                                        <a href="<%= member.profileUrl %>" class="btn" target="_blank" rel="noopener"><i class="fab fa-github"></i> GitHub</a>
+                                    </div>
+                                </div>
+                            <% }); %>
                         </div>
                     </div>
-                </div>
+                <% } %>
+
+                <% if (!teamCategories.creator.length && !teamCategories.contributors.length) { %>
+                    <div class="team-category category-engineering">
+                        <div class="category-header">
+                            <h3>No Team Members Found</h3>
+                            <p>We couldn't load contributors from GitHub right now. Please check back soon.</p>
+                        </div>
+                    </div>
+                <% } %>
             </div>
         </section>
-        <div id="team-popup" class="popup">
-            <div class="popup-content team">
-                <span class="close-btn">&times;</span>
-                <div class="team-popup-grid">
-                    <img id="team-avatar" alt="Team avatar" />
-                    <div class="team-popup-meta">
-                        <h2 id="popup-team-title">Team Member</h2>
-                        <p class="team-role" id="popup-team-role"></p>
-                        <p id="team-description">Details for this team member will appear here.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <footer class="sticky-footer">
             <p>&copy; 2025 Skypixel. All rights reserved.</p>
         </footer>

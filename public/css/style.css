@@ -312,9 +312,11 @@ footer::-webkit-scrollbar {
     font-weight: bold;
     font-family: 'Montserrat', 'Arial', sans-serif;
     border-radius: 8px;
-    transition: transform var(--transition-fast) var(--transition-cubic), 
-                background-color var(--transition-fast), 
-                box-shadow var(--transition-fast) cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: transform 0.35s ease, 
+                background-color 0.35s ease, 
+                box-shadow 0.35s ease, 
+                color 0.35s ease, 
+                border-color 0.35s ease;
     cursor: pointer;
     box-shadow: var(--shadow-sm), 0 2px 6px rgba(0,0,0,0.15);
     font-size: 0.95rem;
@@ -331,9 +333,9 @@ footer::-webkit-scrollbar {
 }
 
 .btn:hover, .btn:focus {
-    transform: translateY(-2px) scale(1.02);
+    transform: translateY(-3px) scale(1.03);
     background-color: #ffca2c;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.3), 0 4px 10px rgba(0,0,0,0.2);
+    box-shadow: 0 12px 26px rgba(0,0,0,0.32), 0 6px 14px rgba(0,0,0,0.22);
     outline: none;
 }
 
@@ -616,6 +618,28 @@ footer::-webkit-scrollbar {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 28px;
     align-items: stretch;
+}
+
+.about .team-category {
+    margin-bottom: 60px;
+    padding: 40px clamp(16px, 3.5vw, 32px);
+}
+
+.about .team-category:last-of-type {
+    margin-bottom: 0;
+}
+
+.about .category-header {
+    margin-bottom: 28px;
+    gap: 10px;
+}
+
+.about .category-header h3 {
+    margin: 0;
+}
+
+.about .category-header p {
+    margin: 0;
 }
 
 .project-card {
