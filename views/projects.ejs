@@ -28,13 +28,32 @@
     </div>
 
     <div class="page-blur" aria-hidden="true"></div>
-    <div id="main-content">
+    <main id="main-content" class="page-layout" role="main">
         <nav class="navbar">
             <div class="container">
+                <div class="nav-menu">
+                    <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-dropdown">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                    <div id="nav-dropdown" class="nav-dropdown" role="menu" aria-hidden="true">
+                        <a href="/projects" class="btn" role="menuitem">
+                            <i class="fas fa-briefcase" aria-hidden="true"></i>
+                            View Projects
+                        </a>
+                        <a href="/about" class="btn btn-secondary" role="menuitem">
+                            <i class="fas fa-users" aria-hidden="true"></i>
+                            About Us
+                        </a>
+                    </div>
+                </div>
                 <a href="/" class="nav-brand">Skypixel</a>
-                <a href="/about" class="btn"><i class="fas fa-users"></i> About Us</a>
             </div>
         </nav>
+        <div class="scroll-indicator scroll-indicator--side" aria-hidden="true">
+            <span></span>
+        </div>
         <section id="projects" class="projects section-padding fade-in-scroll">
             <div class="container">
                 <h2>Our Projects</h2>
@@ -198,9 +217,6 @@
             </div>
         </div>
 
-        <footer class="sticky-footer">
-            <p>&copy; 2025 Skypixel. All rights reserved.</p>
-        </footer>
-    </div>
+    </main>
     <script defer src="/js/script.js?v=<%= assetVersion %>"></script><script defer src="/js/projects-script.js?v=<%= assetVersion %>"></script> </body>
 </html>

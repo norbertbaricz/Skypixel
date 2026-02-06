@@ -7,6 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const loaderWrapper = document.getElementById('loader-wrapper');
     const mainContent = document.getElementById('main-content');
     const loadingTextElement = document.getElementById('loading-text-animation');
+    const menuToggle = document.querySelector('.menu-toggle');
+    const navDropdown = document.getElementById('nav-dropdown');
+    const scrollIndicators = document.querySelectorAll('.scroll-indicator');
 
     const textToAnimate = "Skypixel";
     let continueTypingAnimation = true;
@@ -113,6 +116,98 @@ document.addEventListener('DOMContentLoaded', () => {
         animatedElements.forEach((el) => {
             el.style.transitionDelay = '';
             observer.observe(el);
+        });
+    }
+
+    if (menuToggle && navDropdown) {
+        const closeMenu = () => {
+            navDropdown.classList.remove('show');
+            navDropdown.setAttribute('aria-hidden', 'true');
+            menuToggle.setAttribute('aria-expanded', 'false');
+        };
+
+        menuToggle.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const isOpen = navDropdown.classList.contains('show');
+            if (isOpen) {
+                closeMenu();
+            } else {
+                navDropdown.classList.add('show');
+                navDropdown.setAttribute('aria-hidden', 'false');
+                menuToggle.setAttribute('aria-expanded', 'true');
+            }
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!navDropdown.contains(event.target) && !menuToggle.contains(event.target)) {
+                closeMenu();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                closeMenu();
+            }
+        });
+    }
+
+    if (scrollIndicators.length) {
+        const toggleIndicator = () => {
+            scrollIndicators.forEach((indicator) => {
+                if (window.scrollY > 10) {
+                    indicator.classList.add('hide');
+                } else {
+                    indicator.classList.remove('hide');
+                }
+            });
+        };
+        toggleIndicator();
+        window.addEventListener('scroll', toggleIndicator, { passive: true });
+    }
+
+    const contactForm = document.querySelector('.contact-form');
+    const contactStatusInline = document.getElementById('contact-status-inline');
+    if (contactForm && contactStatusInline) {
+        let statusTimeout = null;
+        contactForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            contactStatusInline.textContent = '';
+            contactStatusInline.classList.remove('success', 'error', 'show');
+            if (statusTimeout) {
+                clearTimeout(statusTimeout);
+                statusTimeout = null;
+            }
+
+            const formData = new FormData(contactForm);
+            const payload = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/contact', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                if (response.ok && data.ok) {
+                    contactStatusInline.textContent = data.message || 'Message sent successfully.';
+                    contactStatusInline.classList.add('success', 'show');
+                    contactForm.reset();
+                } else {
+                    contactStatusInline.textContent = data.message || 'Message could not be sent. Please try again later.';
+                    contactStatusInline.classList.add('error', 'show');
+                }
+            } catch {
+                contactStatusInline.textContent = 'Message could not be sent. Please try again later.';
+                contactStatusInline.classList.add('error', 'show');
+            }
+
+            statusTimeout = setTimeout(() => {
+                contactStatusInline.classList.remove('show');
+            }, 4000);
         });
     }
 });

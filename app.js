@@ -1,9 +1,11 @@
 const express = require('express');
+require('dotenv').config();
 const path = require('path');
 const morgan = require('morgan');
 const compression = require('compression');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -714,6 +716,9 @@ app.use(express.static(path.join(__dirname, 'public'), {
     }
 }));
 
+app.use(express.json({ limit: '100kb' }));
+app.use(express.urlencoded({ extended: false }));
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
@@ -733,7 +738,74 @@ refreshTeamSnapshot(true).catch(() => {});
 scheduleTeamRefresh();
 
 app.get('/', (req, res) => {
-    res.render('index', { title: 'Welcome to Skypixel!' });
+    const contactStatus = req.query.sent === '1' ? 'success' : req.query.error === '1' ? 'error' : null;
+    const contactMessage = contactStatus === 'success'
+        ? 'Message sent successfully.'
+        : contactStatus === 'error'
+            ? 'Message could not be sent. Please try again later.'
+            : '';
+    res.render('index', { title: 'Welcome to Skypixel!', contactStatus, contactMessage });
+});
+
+app.post('/contact', async (req, res) => {
+    const { name, email, message } = req.body || {};
+    const wantsJson = req.headers['x-requested-with'] === 'XMLHttpRequest'
+        || (req.headers.accept && req.headers.accept.includes('application/json'));
+
+    if (!name || !email || !message) {
+        if (wantsJson) {
+            return res.status(400).json({ ok: false, message: 'Please fill in all fields.' });
+        }
+        return res.redirect('/?error=1');
+    }
+
+    const smtpHost = process.env.SMTP_HOST;
+    const smtpPort = Number(process.env.SMTP_PORT) || 587;
+    const smtpUser = process.env.SMTP_USER;
+    const smtpPass = process.env.SMTP_PASS;
+
+    if (!smtpHost || !smtpUser || !smtpPass) {
+        if (!isProd) {
+            console.error('SMTP configuration missing. Set SMTP_HOST, SMTP_USER, SMTP_PASS.');
+        }
+        if (wantsJson) {
+            return res.status(500).json({ ok: false, message: 'Email service unavailable.' });
+        }
+        return res.redirect('/?error=1');
+    }
+
+    try {
+        const transporter = nodemailer.createTransport({
+            host: smtpHost,
+            port: smtpPort,
+            secure: smtpPort === 465,
+            auth: {
+                user: smtpUser,
+                pass: smtpPass
+            }
+        });
+
+        await transporter.sendMail({
+            from: `Skypixel Contact <${smtpUser}>`,
+            to: 'norbertbaricz608@gmail.com',
+            replyTo: email,
+            subject: `Skypixel Contact: ${name}`,
+            text: `From: ${name} <${email}>\n\n${message}`
+        });
+
+        if (wantsJson) {
+            return res.json({ ok: true, message: 'Message sent successfully.' });
+        }
+        return res.redirect('/?sent=1');
+    } catch (error) {
+        if (!isProd) {
+            console.error('Failed to send contact email:', error.message || error);
+        }
+        if (wantsJson) {
+            return res.status(500).json({ ok: false, message: 'Message could not be sent. Please try again later.' });
+        }
+        return res.redirect('/?error=1');
+    }
 });
 
 app.get('/projects', async (req, res, next) => {
