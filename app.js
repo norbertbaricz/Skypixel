@@ -186,6 +186,21 @@ async function fetchHtml(url) {
     }
 }
 
+async function getLatestReleaseFromHtml(repo) {
+    if (!repo) return null;
+    try {
+        const html = await fetchHtml(`https://github.com/${repo}/releases`);
+        const match = html.match(/\/releases\/tag\/([^"\s]+)/);
+        if (!match) return null;
+        return decodeURIComponent(match[1]);
+    } catch (error) {
+        if (!isProd) {
+            console.error(`Failed to parse releases HTML for ${repo}:`, error.message || error);
+        }
+        return null;
+    }
+}
+
 async function getRepoOpenGraphImage(fullName) {
     if (!fullName) return null;
 
@@ -274,11 +289,12 @@ async function getLatestRelease(repo) {
         return version;
     } catch (error) {
         if (error.statusCode === 403) {
+            const version = await getLatestReleaseFromHtml(repo);
             releaseCache.set(repo, {
-                version: null,
+                version,
                 timestamp: Date.now()
             });
-            return null;
+            return version;
         }
         if (error.statusCode === 404) {
             return null;
