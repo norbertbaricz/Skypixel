@@ -1,873 +1,143 @@
-const express = require('express');
-require('dotenv').config();
-const path = require('path');
-const morgan = require('morgan');
-const compression = require('compression');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const nodemailer = require('nodemailer');
+import 'dotenv/config';
+import { fileURLToPath } from 'node:url';
+import express from 'express';
+import path from 'path';
+import morgan from 'morgan';
+import compression from 'compression';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import nodemailer from 'nodemailer';
+import github from './lib/github.js';
+const { ready, refreshProjects, getSnapshot, getStatus } = github;
+import projectApi from './lib/project-api.js';
+const { listProjects, listReleases, sendCatalogJson } = projectApi;
+import rendering from './lib/render.js';
+const { viewData } = rendering;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Easy-to-tune server configuration. Secrets belong only in .env.
+const PORT_ARGUMENT_INDEX = process.argv.indexOf('--port');
+const PORT = Number(process.env.PORT) || (PORT_ARGUMENT_INDEX >= 0 ? Number(process.argv[PORT_ARGUMENT_INDEX + 1]) : 0) || 3000;
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const REFRESH_MS = Number(process.env.PROJECTS_REFRESH_MS) || 10 * 60 * 1000;
+const RATE_WINDOW_MS = 15 * 60 * 1000;
+const RATE_MAX_REQUESTS = 300;
+const CONTACT_MAX_REQUESTS = 5;
+const CONTACT_MAX_MESSAGE_LENGTH = 5000;
+const CONTACT_RECIPIENT = process.env.CONTACT_TO || process.env.SMTP_USER;
+const SMTP_PORT = Number(process.env.SMTP_PORT) || 587;
+const SHUTDOWN_TIMEOUT_MS = 10000;
+const ASSET_CACHE_SECONDS = 86400;
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-const isProd = process.env.NODE_ENV === 'production';
-
-if (typeof fetch !== 'function') {
-    throw new Error('Global fetch API is unavailable. Upgrade Node.js to v18 or newer.');
-}
-
-const projectReleaseRepos = {
-    puro: 'norbertbaricz/Puro',
-    serverLauncher: 'norbertbaricz/Server-Launcher',
-    skypixelWebsite: 'norbertbaricz/Skypixel',
-    dakotaAc: 'norbertbaricz/DakotaAC'
-};
-
-const GITHUB_USERNAME = process.env.GITHUB_USERNAME || 'norbertbaricz';
-
-const releaseCache = new Map();
-const repoImageCache = new Map();
-const userBioCache = new Map();
-const userDisplayNameCache = new Map();
-const CACHE_TTL = 10 * 60 * 1000; // 10 minutes cache
-const GITHUB_TIMEOUT_MS = Number(process.env.GITHUB_TIMEOUT_MS) || 7000;
-const RELEASE_REFRESH_MS = Number(process.env.RELEASE_REFRESH_MS) || CACHE_TTL;
-const PROJECTS_REFRESH_MS = Number(process.env.PROJECTS_REFRESH_MS) || CACHE_TTL;
-const NEW_UPDATE_DAYS = Number(process.env.NEW_UPDATE_DAYS) || 30;
-const EOL_UPDATE_DAYS = Number(process.env.EOL_UPDATE_DAYS) || 180;
-
-// Keep a simple in-memory snapshot so the /projects page renders quickly without waiting on GitHub
-const releaseSnapshot = {
-    data: null,
-    fetchedAt: 0,
-    inFlight: null
-};
-
-const projectsSnapshot = {
-    data: null,
-    fetchedAt: 0,
-    inFlight: null
-};
-
-const teamSnapshot = {
-    data: null,
-    fetchedAt: 0,
-    inFlight: null
-};
-
-function buildGitHubHeaders() {
-    const headers = {
-        Accept: 'application/vnd.github+json',
-        'User-Agent': 'Skypixel-App'
-    };
-
-    if (process.env.GITHUB_TOKEN) {
-        headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
-    }
-
-    return headers;
-}
-
-function normalizeRepo(repo, index, imagePool, ogImageUrl) {
-    const image = ogImageUrl
-        || repo.open_graph_image_url
-        || (repo.full_name ? `https://opengraph.githubassets.com/1/${repo.full_name}` : null)
-        || imagePool[index % imagePool.length];
-    return {
-        id: repo.id,
-        name: repo.name,
-        fullName: repo.full_name,
-        description: repo.description || 'No description provided yet.',
-        htmlUrl: repo.html_url,
-        homepage: repo.homepage || '',
-        language: repo.language || 'Unknown',
-        stars: repo.stargazers_count || 0,
-        forks: repo.forks_count || 0,
-        updatedAt: repo.updated_at,
-        pushedAt: repo.pushed_at,
-        createdAt: repo.created_at,
-        archived: Boolean(repo.archived),
-        disabled: Boolean(repo.disabled),
-        fork: Boolean(repo.fork),
-        topics: Array.isArray(repo.topics) ? repo.topics : [],
-        image
-    };
-}
-
-function buildProjectCategories(projects) {
-    const active = projects.filter((repo) => !repo.archived && !repo.disabled);
-    const archived = projects.filter((repo) => repo.archived);
-
-    const now = Date.now();
-    const toLastUpdate = (repo) => new Date(repo.pushedAt || repo.updatedAt || repo.createdAt).getTime();
-    const daysSinceUpdate = (repo) => Math.floor((now - toLastUpdate(repo)) / (1000 * 60 * 60 * 24));
-
-    const eol = [...archived, ...active.filter((repo) => daysSinceUpdate(repo) >= EOL_UPDATE_DAYS)];
-    const eolIds = new Set(eol.map((repo) => repo.id));
-
-    const activeNonEol = active.filter((repo) => !eolIds.has(repo.id));
-
-    const popular = [...activeNonEol]
-        .sort((a, b) => (b.stars - a.stars) || (toLastUpdate(b) - toLastUpdate(a)))
-        .slice(0, 2);
-
-    const popularIds = new Set(popular.map((repo) => repo.id));
-
-    const newReleases = [...activeNonEol]
-        .filter((repo) => !popularIds.has(repo.id) && daysSinceUpdate(repo) <= NEW_UPDATE_DAYS)
-        .sort((a, b) => toLastUpdate(b) - toLastUpdate(a))
-        .slice(0, 4);
-
-    return {
-        popular,
-        newReleases,
-        archived: eol
-    };
-}
-
-async function fetchFromGitHub(url) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), GITHUB_TIMEOUT_MS);
-
-    try {
-        const response = await fetch(url, {
-            headers: buildGitHubHeaders(),
-            signal: controller.signal
-        });
-
-        if (!response.ok) {
-            const error = new Error(`GitHub responded with status ${response.status}`);
-            error.statusCode = response.status;
-            error.body = await response.text();
-            throw error;
-        }
-
-        const rawData = await response.text();
-        return rawData ? JSON.parse(rawData) : {};
-    } catch (error) {
-        if (error.name === 'AbortError') {
-            const timeoutError = new Error('GitHub request timed out');
-            timeoutError.code = 'GITHUB_TIMEOUT';
-            throw timeoutError;
-        }
-        throw error;
-    } finally {
-        clearTimeout(timeoutId);
-    }
-}
-
-async function fetchHtml(url) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), GITHUB_TIMEOUT_MS);
-
-    try {
-        const response = await fetch(url, {
-            headers: {
-                'User-Agent': 'Skypixel-App',
-                Accept: 'text/html'
-            },
-            signal: controller.signal
-        });
-
-        if (!response.ok) {
-            const error = new Error(`GitHub responded with status ${response.status}`);
-            error.statusCode = response.status;
-            error.body = await response.text();
-            throw error;
-        }
-
-        return await response.text();
-    } catch (error) {
-        if (error.name === 'AbortError') {
-            const timeoutError = new Error('GitHub request timed out');
-            timeoutError.code = 'GITHUB_TIMEOUT';
-            throw timeoutError;
-        }
-        throw error;
-    } finally {
-        clearTimeout(timeoutId);
-    }
-}
-
-async function getLatestReleaseFromHtml(repo) {
-    if (!repo) return null;
-    try {
-        const html = await fetchHtml(`https://github.com/${repo}/releases`);
-        const match = html.match(/\/releases\/tag\/([^"\s]+)/);
-        if (!match) return null;
-        return decodeURIComponent(match[1]);
-    } catch (error) {
-        if (!isProd) {
-            console.error(`Failed to parse releases HTML for ${repo}:`, error.message || error);
-        }
-        return null;
-    }
-}
-
-async function getRepoOpenGraphImage(fullName) {
-    if (!fullName) return null;
-
-    const cached = repoImageCache.get(fullName);
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-        return cached.url;
-    }
-
-    try {
-        const html = await fetchHtml(`https://github.com/${fullName}`);
-        const match = html.match(/property="og:image" content="([^"]+)"/);
-        const url = match ? match[1] : null;
-        repoImageCache.set(fullName, { url, timestamp: Date.now() });
-        return url;
-    } catch (error) {
-        if (!isProd) {
-            console.error(`Failed to load og:image for ${fullName}:`, error.message || error);
-        }
-        return null;
-    }
-}
-
-    function stripHtml(text) {
-        return text.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
-    }
-
-    function parseReposFromHtml(html) {
-        const blocks = html.match(/<li[^>]*itemprop="owns"[\s\S]*?<\/li>/g) || [];
-        return blocks.map((block) => {
-            const nameMatch = block.match(/itemprop="name codeRepository"[^>]*>\s*([\s\S]*?)<\/a>/);
-            const descriptionMatch = block.match(/itemprop="description">([\s\S]*?)<\/p>/);
-            const languageMatch = block.match(/itemprop="programmingLanguage">([\s\S]*?)<\/span>/);
-            const starsMatch = block.match(/href="\/[^\"]+\/stargazers"[\s\S]*?>\s*([\d,]+)\s*</);
-            const updatedMatch = block.match(/<relative-time datetime="([^"]+)"/);
-            const topicMatches = [...block.matchAll(/class="topic-tag[^\"]*"[^>]*>\s*([\s\S]*?)<\/a>/g)];
-
-            const name = nameMatch ? stripHtml(nameMatch[1]) : 'Unknown';
-            const description = descriptionMatch ? stripHtml(descriptionMatch[1]) : 'No description provided yet.';
-            const language = languageMatch ? stripHtml(languageMatch[1]) : 'Unknown';
-            const stars = starsMatch ? Number(starsMatch[1].replace(/,/g, '')) : 0;
-            const updatedAt = updatedMatch ? updatedMatch[1] : null;
-            const topics = topicMatches.map((match) => stripHtml(match[1])).filter(Boolean);
-
-            return {
-                id: name,
-                name,
-                fullName: `${GITHUB_USERNAME}/${name}`,
-                description,
-                htmlUrl: `https://github.com/${GITHUB_USERNAME}/${name}`,
-                homepage: '',
-                language,
-                stars,
-                forks: 0,
-                updatedAt,
-                pushedAt: updatedAt,
-                createdAt: updatedAt,
-                archived: false,
-                disabled: false,
-                fork: false,
-                topics,
-                image: null
-            };
-        });
-    }
-
-async function getLatestRelease(repo) {
-    if (!repo) return null;
-
-    // Check cache first
-    const cached = releaseCache.get(repo);
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-        return cached.version;
-    }
-
-    const url = `https://api.github.com/repos/${repo}/releases/latest`;
-    try {
-        const release = await fetchFromGitHub(url);
-        const version = release?.tag_name || release?.name || null;
-        
-        // Store in cache
-        releaseCache.set(repo, {
-            version,
-            timestamp: Date.now()
-        });
-        
-        return version;
-    } catch (error) {
-        if (error.statusCode === 403) {
-            const version = await getLatestReleaseFromHtml(repo);
-            releaseCache.set(repo, {
-                version,
-                timestamp: Date.now()
-            });
-            return version;
-        }
-        if (error.statusCode === 404) {
-            return null;
-        }
-        if (!isProd) {
-            console.error(`Failed to load release for ${repo}:`, error.message || error);
-        }
-        return null;
-    }
-}
-
-function parseContributorsFromHtml(html) {
-    const matches = [...html.matchAll(/data-hovercard-url="\/users\/([^\/\"]+)\/hovercard"/g)];
-    return [...new Set(matches.map((match) => match[1]))];
-}
-
-function parseUserBioFromHtml(html) {
-    const bioMatch = html.match(/class="p-note"[\s\S]*?>\s*([\s\S]*?)<\/div>/)
-        || html.match(/itemprop="description"[\s\S]*?>\s*([\s\S]*?)<\/div>/);
-    return bioMatch ? stripHtml(bioMatch[1]) : '';
-}
-
-function parseUserDisplayNameFromHtml(html) {
-    const nameMatch = html.match(/itemprop="name"[\s\S]*?>\s*([\s\S]*?)<\/span>/)
-        || html.match(/class="p-name"[\s\S]*?>\s*([\s\S]*?)<\/span>/);
-    return nameMatch ? stripHtml(nameMatch[1]) : '';
-}
-
-async function getUserBio(login) {
-    if (!login) return '';
-
-    const cached = userBioCache.get(login);
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-        return cached.bio;
-    }
-
-    try {
-        const html = await fetchHtml(`https://github.com/${login}`);
-        const bio = parseUserBioFromHtml(html);
-        userBioCache.set(login, { bio, timestamp: Date.now() });
-        return bio;
-    } catch (error) {
-        if (!isProd) {
-            console.error(`Failed to load bio for ${login}:`, error.message || error);
-        }
-        return '';
-    }
-}
-
-async function getUserDisplayName(login) {
-    if (!login) return '';
-
-    const cached = userDisplayNameCache.get(login);
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-        return cached.name;
-    }
-
-    try {
-        const html = await fetchHtml(`https://github.com/${login}`);
-        const name = parseUserDisplayNameFromHtml(html);
-        userDisplayNameCache.set(login, { name, timestamp: Date.now() });
-        return name;
-    } catch (error) {
-        if (!isProd) {
-            console.error(`Failed to load display name for ${login}:`, error.message || error);
-        }
-        return '';
-    }
-}
-
-async function getRepoContributors(fullName) {
-    if (!fullName) return [];
-    try {
-        const html = await fetchHtml(`https://github.com/${fullName}/contributors`);
-        return parseContributorsFromHtml(html);
-    } catch (error) {
-        if (!isProd) {
-            console.error(`Failed to load contributors for ${fullName}:`, error.message || error);
-        }
-        return [];
-    }
-}
-
-async function loadTeamMembers() {
-    const projectsData = await refreshProjectsSnapshot();
-    const repoFullNames = projectsData?.all?.map((repo) => repo.fullName).filter(Boolean) || [];
-
-    const contributorResults = await Promise.allSettled(
-        repoFullNames.map((repoFullName) => getRepoContributors(repoFullName))
-    );
-
-    const contributors = new Set();
-    contributorResults.forEach((result) => {
-        if (result.status === 'fulfilled') {
-            result.value.forEach((login) => contributors.add(login));
-        }
-    });
-
-    contributors.add(GITHUB_USERNAME);
-
-    const logins = [...contributors];
-    const bios = await Promise.allSettled(logins.map((login) => getUserBio(login)));
-    const displayNames = await Promise.allSettled(logins.map((login) => getUserDisplayName(login)));
-
-    const members = logins.map((login, index) => {
-        const bio = bios[index]?.status === 'fulfilled' ? bios[index].value : '';
-        const displayName = displayNames[index]?.status === 'fulfilled' ? displayNames[index].value : '';
-        return {
-            login,
-            name: displayName || login,
-            avatar: `https://avatars.githubusercontent.com/${login}?s=200`,
-            profileUrl: `https://github.com/${login}`,
-            role: login === GITHUB_USERNAME ? 'Creator' : 'Contributor',
-            description: bio || (login === GITHUB_USERNAME
-                ? 'Creator and lead for the Skypixel projects.'
-                : 'Contributor across the Skypixel repositories.')
-        };
-    });
-
-    const categories = {
-        creator: members.filter((member) => member.login === GITHUB_USERNAME),
-        contributors: members.filter((member) => member.login !== GITHUB_USERNAME)
-    };
-
-    return { members, categories };
-}
-
-async function loadProjectReleases() {
-    const releases = await Promise.all(
-        Object.entries(projectReleaseRepos).map(async ([key, repo]) => {
-            const version = await getLatestRelease(repo);
-            return [key, version];
-        })
-    );
-    return Object.fromEntries(releases);
-}
-
-async function loadGitHubProjects() {
-    const url = `https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100&sort=updated&type=public`;
-    try {
-        const repos = await fetchFromGitHub(url);
-        const imagePool = [
-            '/images/project1.jpg',
-            '/images/project2.jpg',
-            '/images/project3.jpg',
-            '/images/project4.jpg',
-            '/images/project5.jpg'
-        ];
-
-        const filtered = (Array.isArray(repos) ? repos : []).filter((repo) => !repo.fork);
-        const ogImages = await Promise.allSettled(
-            filtered.map((repo) => getRepoOpenGraphImage(repo.full_name))
-        );
-        const normalized = filtered.map((repo, index) => {
-            const ogImage = ogImages[index]?.status === 'fulfilled' ? ogImages[index].value : null;
-            return normalizeRepo(repo, index, imagePool, ogImage);
-        });
-
-        const categories = buildProjectCategories(normalized);
-        return {
-            all: normalized,
-            categories
-        };
-    } catch (error) {
-            let fallbackRepos = [];
-            try {
-                const html = await fetchHtml(`https://github.com/${GITHUB_USERNAME}?tab=repositories`);
-                fallbackRepos = parseReposFromHtml(html);
-            } catch {
-                fallbackRepos = [];
-            }
-
-            if (fallbackRepos.length) {
-                const imagePool = [
-                    '/images/project1.jpg',
-                    '/images/project2.jpg',
-                    '/images/project3.jpg',
-                    '/images/project4.jpg',
-                    '/images/project5.jpg'
-                ];
-
-                const ogImages = await Promise.allSettled(
-                    fallbackRepos.map((repo) => getRepoOpenGraphImage(repo.fullName))
-                );
-                const normalizedFallback = fallbackRepos.map((repo, index) => {
-                    const ogImage = ogImages[index]?.status === 'fulfilled' ? ogImages[index].value : null;
-                    return {
-                        ...repo,
-                        image: ogImage || (repo.fullName ? `https://opengraph.githubassets.com/1/${repo.fullName}` : null) || imagePool[index % imagePool.length]
-                    };
-                });
-
-                const categories = buildProjectCategories(normalizedFallback);
-                return {
-                    all: normalizedFallback,
-                    categories
-                };
-            }
-
-        if (!isProd) {
-            console.error('Failed to load GitHub repositories:', error.message || error);
-        }
-        return {
-            all: [],
-            categories: { popular: [], newReleases: [], archived: [] }
-        };
-    }
-}
-
-async function refreshReleaseSnapshot(force = false) {
-    const isFresh = Date.now() - releaseSnapshot.fetchedAt < CACHE_TTL;
-    if (!force && isFresh && releaseSnapshot.data) {
-        return releaseSnapshot.data;
-    }
-
-    if (releaseSnapshot.inFlight) {
-        return releaseSnapshot.inFlight;
-    }
-
-    releaseSnapshot.inFlight = loadProjectReleases()
-        .then((data) => {
-            releaseSnapshot.data = data;
-            releaseSnapshot.fetchedAt = Date.now();
-            return data;
-        })
-        .catch((error) => {
-            if (!isProd) {
-                console.error('Failed to refresh release snapshot:', error.message || error);
-            }
-            return releaseSnapshot.data;
-        })
-        .finally(() => {
-            releaseSnapshot.inFlight = null;
-        });
-
-    return releaseSnapshot.inFlight;
-}
-
-async function refreshProjectsSnapshot(force = false) {
-    const isFresh = Date.now() - projectsSnapshot.fetchedAt < CACHE_TTL;
-    if (!force && isFresh && projectsSnapshot.data) {
-        return projectsSnapshot.data;
-    }
-
-    if (projectsSnapshot.inFlight) {
-        return projectsSnapshot.inFlight;
-    }
-
-    projectsSnapshot.inFlight = loadGitHubProjects()
-        .then((data) => {
-            projectsSnapshot.data = data;
-            projectsSnapshot.fetchedAt = Date.now();
-            return data;
-        })
-        .catch((error) => {
-            if (!isProd) {
-                console.error('Failed to refresh projects snapshot:', error.message || error);
-            }
-            return projectsSnapshot.data || { all: [], categories: { popular: [], newReleases: [], archived: [] } };
-        })
-        .finally(() => {
-            projectsSnapshot.inFlight = null;
-        });
-
-    return projectsSnapshot.inFlight;
-}
-
-async function refreshTeamSnapshot(force = false) {
-    const isFresh = Date.now() - teamSnapshot.fetchedAt < CACHE_TTL;
-    if (!force && isFresh && teamSnapshot.data) {
-        return teamSnapshot.data;
-    }
-
-    if (teamSnapshot.inFlight) {
-        return teamSnapshot.inFlight;
-    }
-
-    teamSnapshot.inFlight = loadTeamMembers()
-        .then((data) => {
-            teamSnapshot.data = data;
-            teamSnapshot.fetchedAt = Date.now();
-            return data;
-        })
-        .catch((error) => {
-            if (!isProd) {
-                console.error('Failed to refresh team snapshot:', error.message || error);
-            }
-            return teamSnapshot.data || { members: [], categories: { creator: [], contributors: [] } };
-        })
-        .finally(() => {
-            teamSnapshot.inFlight = null;
-        });
-
-    return teamSnapshot.inFlight;
-}
-
-function scheduleReleaseRefresh() {
-    if (RELEASE_REFRESH_MS <= 0) return;
-    setInterval(() => {
-        refreshReleaseSnapshot(true).catch(() => {});
-    }, RELEASE_REFRESH_MS).unref();
-}
-
-function scheduleProjectsRefresh() {
-    if (PROJECTS_REFRESH_MS <= 0) return;
-    setInterval(() => {
-        refreshProjectsSnapshot(true).catch(() => {});
-    }, PROJECTS_REFRESH_MS).unref();
-}
-
-function scheduleTeamRefresh() {
-    if (PROJECTS_REFRESH_MS <= 0) return;
-    setInterval(() => {
-        refreshTeamSnapshot(true).catch(() => {});
-    }, PROJECTS_REFRESH_MS).unref();
-}
-
-if (process.env.TRUST_PROXY) {
-    app.set('trust proxy', process.env.TRUST_PROXY === 'true' ? 1 : Number(process.env.TRUST_PROXY) || 0);
-}
-
-if (!isProd) {
-    app.use(morgan('dev'));
-} else {
-    app.use(morgan('combined'));
-}
-
 app.disable('x-powered-by');
-
-app.use(
-    helmet({
-        crossOriginResourcePolicy: { policy: 'same-origin' },
-        hsts: isProd ? undefined : false
-    })
-);
-
-{
-    const cspDirectives = {
-        defaultSrc: ["'self'"],
-        scriptSrc: [
-            "'self'",
-            'https://cdnjs.cloudflare.com',
-            "'unsafe-inline'"
-        ],
-        scriptSrcAttr: ["'unsafe-inline'"],
-        styleSrc: [
-            "'self'",
-            'https://fonts.googleapis.com',
-            'https://cdnjs.cloudflare.com',
-            "'unsafe-inline'"
-        ],
-        imgSrc: [
-            "'self'",
-            'data:',
-            'https://placehold.co',
-            'https://source.unsplash.com',
-            'https://images.unsplash.com',
-            'https://opengraph.githubassets.com',
-            'https://avatars.githubusercontent.com',
-            'https://repository-images.githubusercontent.com',
-            'https://githubusercontent.com',
-            'https://user-images.githubusercontent.com'
-        ],
-        fontSrc: ["'self'", 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com'],
-        connectSrc: ["'self'"],
-        objectSrc: ["'none'"]
-    };
-    if (isProd) cspDirectives.upgradeInsecureRequests = [];
-    else cspDirectives.upgradeInsecureRequests = null;
-
-    app.use(
-        helmet.contentSecurityPolicy({
-            useDefaults: true,
-            directives: cspDirectives
-        })
-    );
-}
-
-app.use(helmet.referrerPolicy({ policy: 'strict-origin-when-cross-origin' }));
-app.use(helmet.frameguard({ action: 'sameorigin' }));
-app.use(helmet.crossOriginOpenerPolicy({ policy: 'same-origin' }));
-
-app.use((req, res, next) => {
-    res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
-    next();
-});
-
-if (isProd) {
-    app.use(
-        helmet.hsts({
-            maxAge: 15552000,
-            includeSubDomains: true,
-            preload: false
-        })
-    );
-}
-
-app.use(compression({ threshold: 1024 }));
-
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 300,
-    standardHeaders: true,
-    legacyHeaders: false
-});
-app.use(limiter);
-
-app.use(express.static(path.join(__dirname, 'public'), {
-    setHeaders: (res, filePath) => {
-        if (filePath.endsWith('.html')) {
-            res.setHeader('Cache-Control', 'no-cache');
-        } else if (/\.(css|js)$/.test(filePath)) {
-            res.setHeader('Cache-Control', 'public, max-age=604800');
-        } else if (/\.(png|jpe?g|gif|svg|webp|ico)$/.test(filePath)) {
-            res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
+if (process.env.TRUST_PROXY) app.set('trust proxy', process.env.TRUST_PROXY === 'true' ? 1 : Number(process.env.TRUST_PROXY) || 0);
+app.use(morgan(IS_PRODUCTION ? 'combined' : 'dev'));
+app.use(helmet({
+    hsts: IS_PRODUCTION ? undefined : false,
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"], scriptSrc: ["'self'"], scriptSrcAttr: ["'none'"],
+            styleSrc: ["'self'", "'unsafe-inline'"], fontSrc: ["'self'"],
+            imgSrc: ["'self'", 'data:', 'https://avatars.githubusercontent.com'],
+            connectSrc: ["'self'"], objectSrc: ["'none'"],
+            upgradeInsecureRequests: IS_PRODUCTION ? [] : null
         }
     }
 }));
-
-app.use(express.json({ limit: '100kb' }));
-app.use(express.urlencoded({ extended: false }));
-
+app.use((_req, res, next) => {
+    res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+    next();
+});
+app.use(compression({ threshold: 1024 }));
+app.use(express.static(path.join(__dirname, 'public'), {
+    maxAge: IS_PRODUCTION ? ASSET_CACHE_SECONDS * 1000 : 0,
+    setHeaders: res => { if (!IS_PRODUCTION) res.setHeader('Cache-Control', 'no-store'); }
+}));
+app.use(rateLimit({ windowMs: RATE_WINDOW_MS, limit: RATE_MAX_REQUESTS, standardHeaders: 'draft-8', legacyHeaders: false }));
+app.use(express.json({ limit: '20kb' }));
+app.use(express.urlencoded({ extended: false, limit: '20kb' }));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-try {
-    const pkg = require('./package.json');
-    app.locals.assetVersion = (pkg && pkg.version) ? pkg.version : Date.now().toString();
-} catch {
-    app.locals.assetVersion = Date.now().toString();
+for (const [route, page] of [['/', 'index'], ['/projects', 'projects'], ['/updates', 'updates'], ['/about', 'about']]) {
+    app.get(route, (_req, res) => {
+        refreshProjects().catch(() => {});
+        res.render(page, viewData(page, getSnapshot()));
+    });
 }
 
-// Pre-warm release data so the first /projects render is fast, then keep it fresh on an interval
-refreshReleaseSnapshot(true).catch(() => {});
-scheduleReleaseRefresh();
-refreshProjectsSnapshot(true).catch(() => {});
-scheduleProjectsRefresh();
-refreshTeamSnapshot(true).catch(() => {});
-scheduleTeamRefresh();
 
-app.get('/', (req, res) => {
-    const contactStatus = req.query.sent === '1' ? 'success' : req.query.error === '1' ? 'error' : null;
-    const contactMessage = contactStatus === 'success'
-        ? 'Message sent successfully.'
-        : contactStatus === 'error'
-            ? 'Message could not be sent. Please try again later.'
-            : '';
-    res.render('index', { title: 'Welcome to Skypixel!', contactStatus, contactMessage });
-});
-
-app.post('/contact', async (req, res) => {
-    const { name, email, message } = req.body || {};
-    const wantsJson = req.headers['x-requested-with'] === 'XMLHttpRequest'
-        || (req.headers.accept && req.headers.accept.includes('application/json'));
-
-    if (!name || !email || !message) {
-        if (wantsJson) {
-            return res.status(400).json({ ok: false, message: 'Please fill in all fields.' });
-        }
-        return res.redirect('/?error=1');
-    }
-
-    const smtpHost = process.env.SMTP_HOST;
-    const smtpPort = Number(process.env.SMTP_PORT) || 587;
-    const smtpUser = process.env.SMTP_USER;
-    const smtpPass = process.env.SMTP_PASS;
-
-    if (!smtpHost || !smtpUser || !smtpPass) {
-        if (!isProd) {
-            console.error('SMTP configuration missing. Set SMTP_HOST, SMTP_USER, SMTP_PASS.');
-        }
-        if (wantsJson) {
-            return res.status(500).json({ ok: false, message: 'Email service unavailable.' });
-        }
-        return res.redirect('/?error=1');
-    }
-
+// Serve cached data immediately; all refreshes share one bounded background job.
+app.get('/api/projects', async (req, res, next) => {
     try {
-        const transporter = nodemailer.createTransport({
-            host: smtpHost,
-            port: smtpPort,
-            secure: smtpPort === 465,
-            auth: {
-                user: smtpUser,
-                pass: smtpPass
-            }
-        });
-
-        await transporter.sendMail({
-            from: `Skypixel Contact <${smtpUser}>`,
-            to: 'norbertbaricz608@gmail.com',
-            replyTo: email,
-            subject: `Skypixel Contact: ${name}`,
-            text: `From: ${name} <${email}>\n\n${message}`
-        });
-
-        if (wantsJson) {
-            return res.json({ ok: true, message: 'Message sent successfully.' });
-        }
-        return res.redirect('/?sent=1');
-    } catch (error) {
-        if (!isProd) {
-            console.error('Failed to send contact email:', error.message || error);
-        }
-        if (wantsJson) {
-            return res.status(500).json({ ok: false, message: 'Message could not be sent. Please try again later.' });
-        }
-        return res.redirect('/?error=1');
-    }
+        await ready;
+        refreshProjects().catch(() => {});
+        return sendCatalogJson(req, res, listProjects(getSnapshot(), req.query));
+    } catch (error) { next(error); }
 });
-
-app.get('/projects', async (req, res, next) => {
+app.get('/api/projects/:name', async (req, res, next) => {
     try {
-        const [releaseVersions, projectsData] = await Promise.all([
-            refreshReleaseSnapshot(),
-            refreshProjectsSnapshot()
-        ]);
-        res.render('projects', {
-            title: 'Our Projects - Skypixel',
-            releaseVersions,
-            projectsData,
-            githubUsername: GITHUB_USERNAME
-        });
+        await ready;
+        refreshProjects().catch(() => {});
+        const snapshot = getSnapshot();
+        const project = snapshot.projects.find(item => item.name.toLowerCase() === req.params.name.toLowerCase());
+        if (!project) return res.status(404).json({ ok: false, message: 'Project not found.' });
+        return sendCatalogJson(req, res, { project, syncedAt: snapshot.syncedAt, sync: snapshot.sync });
+    } catch (error) { next(error); }
+});
+app.get('/api/releases', async (req, res, next) => {
+    try { await ready; refreshProjects().catch(() => {}); return sendCatalogJson(req, res, listReleases(getSnapshot(), req.query)); }
+    catch (error) { next(error); }
+});
+app.get('/api/status', async (_req, res) => { await ready; res.setHeader('Cache-Control', 'no-store'); res.json({ ok: true, catalog: getStatus() }); });
+app.get('/health', (_req, res) => res.json({ ok: true, service: 'skypixel', github: getStatus().state }));
+
+const contactLimiter = rateLimit({ windowMs: RATE_WINDOW_MS, limit: CONTACT_MAX_REQUESTS, standardHeaders: 'draft-8', legacyHeaders: false, message: { ok: false, message: 'Please wait before sending another message.' } });
+app.post('/contact', contactLimiter, async (req, res) => {
+    const { name, email, message, website } = req.body || {};
+    const wantsJson = req.accepts(['html', 'json']) === 'json' || req.get('x-requested-with') === 'XMLHttpRequest';
+    function reply(status, ok, text) {
+        if (wantsJson) return res.status(status).json({ ok, message: text });
+        return res.redirect(`/?${ok ? 'sent=1' : 'error=1'}#contact`);
+    }
+    if (website) return reply(200, true, 'Message sent successfully.');
+    if (typeof name !== 'string' || !name.trim() || name.length > 100 || /[\r\n]/.test(name) || typeof email !== 'string' || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || typeof message !== 'string' || !message.trim() || message.length > CONTACT_MAX_MESSAGE_LENGTH) {
+        return reply(400, false, 'Enter a name, valid email, and a message of up to 5,000 characters.');
+    }
+    if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) return reply(503, false, 'Email is unavailable. Please contact us through GitHub.');
+    try {
+        const transport = nodemailer.createTransport({ host: process.env.SMTP_HOST, port: SMTP_PORT, secure: SMTP_PORT === 465, auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }, connectionTimeout: 10000, socketTimeout: 15000 });
+        await transport.sendMail({ from: process.env.SMTP_USER, to: CONTACT_RECIPIENT, replyTo: email.trim(), subject: `Skypixel Contact: ${name.trim()}`, text: `From: ${name.trim()} <${email.trim()}>\n\n${message.trim()}` });
+        return reply(200, true, 'Message sent successfully.');
     } catch (error) {
-        next(error);
+        console.error('Contact delivery failed:', error.message);
+        return reply(502, false, 'Your message could not be delivered. Please try again later.');
     }
 });
 
-app.get('/about', (req, res) => {
-    refreshTeamSnapshot()
-        .then((teamData) => {
-            res.render('about', {
-                title: 'About Us - Skypixel',
-                teamData
-            });
-        })
-        .catch(() => {
-            res.render('about', {
-                title: 'About Us - Skypixel',
-                teamData: { members: [], categories: { creator: [], contributors: [] } }
-            });
-        });
+app.use((req, res, next) => {
+    if (req.path.startsWith('/api/')) return res.status(404).json({ ok: false, message: 'API route not found.' });
+    next();
+});
+app.use((_req, res) => res.status(404).render('error', { ...viewData('error', getSnapshot()), code: '404', errorTitle: 'This path is still unexplored.', errorMessage: 'The page you are looking for could not be found.' }));
+app.use((error, req, res, _next) => {
+    console.error('Server error:', error.message);
+    if (req.path.startsWith('/api/')) return res.status(error.status || 500).json({ ok: false, message: 'The request could not be completed.' });
+    res.status(error.status || 500).render('error', { ...viewData('error', getSnapshot()), code: String(error.status || 500), errorTitle: 'A small detour.', errorMessage: 'Something went wrong. Please try again in a moment.' });
 });
 
-app.use((req, res) => {
-    res.status(404).send('Not Found');
-});
-
-app.use((err, req, res, _next) => {
-    console.error('Server Error:', {
-        message: err.message,
-        stack: isProd ? undefined : err.stack,
-        path: req.path,
-        method: req.method,
-        timestamp: new Date().toISOString()
-    });
-    res.status(err.status || 500).send(isProd ? 'Internal Server Error' : err.message);
-});
-
-const server = app.listen(PORT, () => {
-    console.log(`
-🚀 Skypixel Server Started Successfully`);
-    console.log(`📍 Environment: ${isProd ? 'Production' : 'Development'}`);
-    console.log(`🌐 Server: http://localhost:${PORT}`);
-    console.log(`⏰ Started at: ${new Date().toISOString()}\n`);
-});
-
-process.on('SIGTERM', () => {
-    console.log('SIGTERM received, closing server gracefully...');
-    server.close(() => {
-        console.log('Server closed');
-        process.exit(0);
-    });
-});
+if (fileURLToPath(import.meta.url) === path.resolve(process.argv[1] || '')) {
+    refreshProjects().catch(() => {});
+    const refreshTimer = setInterval(() => refreshProjects(true).catch(() => {}), REFRESH_MS);
+    refreshTimer.unref();
+    const server = app.listen(PORT, '0.0.0.0', () => console.log(`Skypixel Framework is running on port ${PORT}`));
+    function shutdown() {
+        clearInterval(refreshTimer);
+        server.close(() => process.exit(0));
+        setTimeout(() => process.exit(1), SHUTDOWN_TIMEOUT_MS).unref();
+    }
+    process.on('SIGTERM', shutdown);
+    process.on('SIGINT', shutdown);
+}
+export default app;

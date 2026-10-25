@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#090909">
+    <meta name="color-scheme" content="dark">
+    <meta name="description" content="Skypixel Framework by <%= creatorName %>. Explore the projects, follow their progress, and discover the ideas behind Skypixel.">
+    <meta name="author" content="<%= creatorName %>">
+    <meta property="og:title" content="<%= title %>">
+    <meta property="og:description" content="All my projects. One place. Discover Skypixel Framework.">
+    <meta property="og:type" content="website">
+    <% if (siteUrl) { %><meta property="og:url" content="<%= siteUrl %><%= page === 'index' ? '/' : '/' + page %>"><% } %>
+    <meta property="og:image" content="<%= siteUrl %>/images/logo-hd.png">
+    <title><%= title %></title>
+    <link rel="icon" type="image/png" href="/images/favicon.png">
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="preload" as="image" type="image/webp" href="<%= CONFIG.brandLogo %>">
+    <link rel="stylesheet" href="/css/style.css?v=<%= assetVersion %>">
+    <script src="/js/boot.js?v=<%= assetVersion %>"></script>
+    <script defer src="/js/loader.js?v=<%= assetVersion %>"></script>
+    <script defer src="/js/catalog.js?v=<%= assetVersion %>"></script>
+    <script defer src="/js/script.js?v=<%= assetVersion %>"></script>
+    <% if (page === 'projects') { %><script defer src="/js/projects-script.js?v=<%= assetVersion %>"></script><% } %>
+    <% if (page === 'about') { %><script defer src="/js/about-script.js?v=<%= assetVersion %>"></script><% } %>
+    <% if (page === 'updates') { %><script defer src="/js/updates-script.js?v=<%= assetVersion %>"></script><% } %>
+</head>
+<body data-version="<%= assetVersion %>" data-page="<%= page %>" data-username="<%= username %>" data-api="<%= staticExport ? '/data/projects.json' : '/api/projects' %>" data-static="<%= staticExport %>">
+<a class="skip-link" href="#main-content">Skip to content</a>
+<div id="loader-wrapper" class="site-loader" role="status" aria-live="polite" aria-label="Loading Skypixel Framework">
+    <div class="loader-content"><div class="loader-emblem"><span></span><%- include('brand-logo', {size:80, altText:'Skypixel Framework', eager:true}) %></div><div id="loading-text-animation">Skypixel</div><p class="loader-caption">FRAMEWORK</p><div class="loader-track" aria-hidden="true"><span></span></div><p class="loader-status">Loading the website…</p></div>
+</div>
+<header class="site-header"><div class="container nav-inner">
+    <a class="brand" href="/" aria-label="Skypixel Framework home"><%- include('brand-logo', {size:44, altText:'', eager:true}) %><span>Skypixel<small>FRAMEWORK</small></span></a>
+    <nav class="desktop-nav" aria-label="Main navigation"><% [['/', 'index', 'Home'], ['/projects', 'projects', 'Projects'], ['/updates', 'updates', 'Updates'], ['/about', 'about', 'About']].forEach(([url, key, label])=>{ %><a href="<%= url %>" <%- page === key ? 'aria-current="page"' : '' %>><%= label %></a><% }); %></nav>
+    <div class="nav-actions"><a class="button button-small button-outline nav-github" href="https://github.com/<%= username %>" target="_blank" rel="noopener noreferrer" aria-label="View <%= username %> on GitHub"><%- icon('github') %><span>GitHub</span><%- icon('arrow') %></a><button class="menu-toggle icon-button" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="mobile-nav"><span></span><span></span><span></span></button></div>
+</div><nav id="mobile-nav" class="mobile-nav" aria-label="Mobile navigation" hidden><% [['/', 'index', 'Home'], ['/projects', 'projects', 'Projects'], ['/updates', 'updates', 'Updates'], ['/about', 'about', 'About']].forEach(([url, key, label])=>{ %><a href="<%= url %>" <%- page === key ? 'aria-current="page"' : '' %>><%= label %></a><% }); %></nav></header>
+<main id="main-content">

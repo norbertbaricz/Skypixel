@@ -1,0 +1,229 @@
+{
+  "fetchedAt": "2026-10-24T20:01:59.227Z",
+  "repositories": [
+    {
+      "id": 985163438,
+      "name": "DakotaAC",
+      "full_name": "norbertbaricz/DakotaAC",
+      "html_url": "https://github.com/norbertbaricz/DakotaAC",
+      "description": "DakotaAC is a powerful anti-cheat plugin for Minecraft servers. It monitors and prevents suspicious activities to safeguard your server and provide a clean environment for players.",
+      "homepage": "",
+      "language": "Java",
+      "stargazers_count": 5,
+      "forks_count": 0,
+      "pushed_at": "2026-10-24T19:57:59Z",
+      "updated_at": "2026-10-24T19:58:03Z",
+      "created_at": "2025-05-17T07:31:52Z",
+      "archived": false,
+      "fork": false,
+      "private": false,
+      "topics": [
+        "java",
+        "minecraft"
+      ],
+      "default_branch": "master",
+      "license": {
+        "key": "other",
+        "name": "Other",
+        "spdx_id": "NOASSERTION",
+        "url": null,
+        "node_id": "MDc6TGljZW5zZTA="
+      },
+      "owner": {
+        "login": "norbertbaricz"
+      }
+    },
+    {
+      "id": 1097198699,
+      "name": "BoosterX",
+      "full_name": "norbertbaricz/BoosterX",
+      "html_url": "https://github.com/norbertbaricz/BoosterX",
+      "description": "The simple way to boost your computer!",
+      "homepage": null,
+      "language": "C#",
+      "stargazers_count": 2,
+      "forks_count": 0,
+      "pushed_at": "2026-10-24T19:54:44Z",
+      "updated_at": "2026-10-24T19:54:48Z",
+      "created_at": "2025-11-15T18:05:54Z",
+      "archived": false,
+      "fork": false,
+      "private": false,
+      "topics": [],
+      "default_branch": "main",
+      "license": {
+        "key": "other",
+        "name": "Other",
+        "spdx_id": "NOASSERTION",
+        "url": null,
+        "node_id": "MDc6TGljZW5zZTA="
+      },
+      "owner": {
+        "login": "norbertbaricz"
+      }
+    },
+    {
+      "id": 837485831,
+      "name": "Puro",
+      "full_name": "norbertbaricz/Puro",
+      "html_url": "https://github.com/norbertbaricz/Puro",
+      "description": "Puro is a feature-rich Discord bot built with Node.js and Discord.js, offering a variety of commands and event-driven functionalities to enhance your server.",
+      "homepage": "",
+      "language": "JavaScript",
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "pushed_at": "2026-10-24T19:53:37Z",
+      "updated_at": "2026-10-24T19:53:41Z",
+      "created_at": "2024-08-03T05:51:15Z",
+      "archived": false,
+      "fork": false,
+      "private": false,
+      "topics": [
+        "bot",
+        "discord"
+      ],
+      "default_branch": "main",
+      "license": {
+        "key": "other",
+        "name": "Other",
+        "spdx_id": "NOASSERTION",
+        "url": null,
+        "node_id": "MDc6TGljZW5zZTA="
+      },
+      "owner": {
+        "login": "norbertbaricz"
+      }
+    },
+    {
+      "id": 985375951,
+      "name": "Server-Launcher",
+      "full_name": "norbertbaricz/Server-Launcher",
+      "html_url": "https://github.com/norbertbaricz/Server-Launcher",
+      "description": "Host your own Minecraft server at home with ease! This launcher simplifies the process for members to run their personal Minecraft servers.",
+      "homepage": "",
+      "language": "C#",
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "pushed_at": "2026-10-24T19:24:52Z",
+      "updated_at": "2026-10-24T19:24:56Z",
+      "created_at": "2025-05-17T16:23:45Z",
+      "archived": false,
+      "fork": false,
+      "private": false,
+      "topics": [
+        "launcher",
+        "minecraft"
+      ],
+      "default_branch": "main",
+      "license": {
+        "key": "other",
+        "name": "Other",
+        "spdx_id": "NOASSERTION",
+        "url": null,
+        "node_id": "MDc6TGljZW5zZTA="
+      },
+      "owner": {
+        "login": "norbertbaricz"
+      }
+    },
+    {
+      "id": 985203811,
+      "name": "Skypixel",
+      "full_name": "norbertbaricz/Skypixel",
+      "html_url": "https://github.com/norbertbaricz/Skypixel",
+      "description": "Explore the creativity of Skypixel! This website features all the exciting projects developed by our talented team members.",
+      "homepage": "",
+      "language": "JavaScript",
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "pushed_at": "2026-10-24T19:53:59Z",
+      "updated_at": "2026-10-24T19:54:03Z",
+      "created_at": "2025-05-17T09:21:04Z",
+      "archived": false,
+      "fork": false,
+      "private": false,
+      "topics": [
+        "projects",
+        "website"
+      ],
+      "default_branch": "main",
+      "license": {
+        "key": "other",
+        "name": "Other",
+        "spdx_id": "NOASSERTION",
+        "url": null,
+        "node_id": "MDc6TGljZW5zZTA="
+      },
+      "owner": {
+        "login": "norbertbaricz"
+      }
+    }
+  ],
+  "releases": {
+    "DakotaAC": {
+      "tag_name": "v0.17",
+      "name": "DakotaAC",
+      "html_url": "https://github.com/norbertbaricz/DakotaAC/releases/tag/v0.17",
+      "published_at": "2026-08-21T04:27:31Z",
+      "body": "",
+      "assets": [
+        {
+          "name": "DakotaAC-0.17.jar",
+          "browser_download_url": "https://github.com/norbertbaricz/DakotaAC/releases/download/v0.17/DakotaAC-0.17.jar",
+          "size": 246592,
+          "download_count": 2
+        }
+      ]
+    },
+    "Puro": {
+      "tag_name": "v1.2.16",
+      "name": "v1.2.16",
+      "html_url": "https://github.com/norbertbaricz/Puro/releases/tag/v1.2.16",
+      "published_at": "2026-02-06T05:06:51Z",
+      "body": "# Changelog\r\n\r\nAll notable changes to this project will be documented in this file.\r\n\r\nThe format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).\r\n\r\n## [1.2.16] - 2026-01-31\r\n\r\n### Added\r\n- Added `howl-greeting` command and greeting message event for The Lunar Pack.\r\n- Added guild event logging (bans, channels, emojis, roles, messages, voice states).\r\n- Added `bellyrub` command with GIF support and custom responses.\r\n- Implemented sharding support and updated start script.\r\n\r\n### Fixed\r\n- Fixed stale interaction handling in `interactionCreate`.\r\n- Fixed interaction defer errors in `bellyrub` and `fetch-e621`.\r\n\r\n### Removed\r\n- Removed unused dependencies from `package.json`.\r\n- Removed sharding support and related configurations (after rollout adjustments).\r\n- Removed `howl-greeting.js` and `greetingMessageCreate.js` from The Wolf Den.",
+      "assets": []
+    },
+    "Server-Launcher": {
+      "tag_name": "v2.1",
+      "name": "Server Launcher Reborn v2.1 - Windows x64",
+      "html_url": "https://github.com/norbertbaricz/Server-Launcher/releases/tag/v2.1",
+      "published_at": "2026-10-23T06:07:35Z",
+      "body": "# Server Launcher Reborn v2.1 - Windows x64\r\n\r\nThe Reborn desktop edition brings the current C# launcher to this repository with a portable Windows distribution.\r\n\r\n## Download\r\n\r\nDownload **Server-Launcher-Reborn-2.1.0-win-x64.zip**, extract it into a writable folder and open **Server Launcher.exe**. .NET is included; an installer and developer tools are not required.\r\n\r\n## Included\r\n\r\n- PaperMC, Fabric and native Bedrock server creation.\r\n- Automatic matching Java preparation and enabled-content runtime checks.\r\n- Global RAM sliders, Standard/Balance/Performance profiles and Balance defaults.\r\n- Per-server plugins, mods, add-ons and world management.\r\n- Live console and process monitoring, LAN/public address display, server rename/delete.\r\n- Desktop notifications, fixed event sounds, optional close-to-tray and Windows startup.\r\n- Embedded application icon, logo and event audio in the portable executable.\r\n\r\nThe workflow starts the published executable in verification mode, reads its embedded images and four event sounds, renders the custom controls, and creates the ZIP with a source/version manifest. SHA256SUMS.txt and distribution-verification.json accompany the archive.\r\n\r\n## Before use\r\n\r\n- This edition is for Windows x64. Native Bedrock additionally needs the Microsoft Visual C++ x64 runtime.\r\n- Internet is needed for initial server/Java downloads. Minecraft servers and JDKs are not bundled.\r\n- Keep your servers/, runtime/ and launcher.settings.json when updating.\r\n- A public IP display does not configure port forwarding or a tunnel.\r\n- Electron profiles are not automatically migrated; existing worlds can be copied and imported.\r\n\r\nThis is the stable Windows release built from `main`. Its GitHub tag is `v2.1`; executable and package metadata use `2.1.0`. Older Electron releases remain available in the release archive.\r\n",
+      "assets": [
+        {
+          "name": "distribution-verification.json",
+          "browser_download_url": "https://github.com/norbertbaricz/Server-Launcher/releases/download/v2.1/distribution-verification.json",
+          "size": 140,
+          "download_count": 0
+        },
+        {
+          "name": "Server-Launcher-Reborn-2.1.0-win-x64.zip",
+          "browser_download_url": "https://github.com/norbertbaricz/Server-Launcher/releases/download/v2.1/Server-Launcher-Reborn-2.1.0-win-x64.zip",
+          "size": 51448528,
+          "download_count": 2
+        },
+        {
+          "name": "SHA256SUMS.txt",
+          "browser_download_url": "https://github.com/norbertbaricz/Server-Launcher/releases/download/v2.1/SHA256SUMS.txt",
+          "size": 108,
+          "download_count": 0
+        }
+      ]
+    },
+    "Skypixel": {
+      "tag_name": "v1.1.12",
+      "name": "v1.1.12",
+      "html_url": "https://github.com/norbertbaricz/Skypixel/releases/tag/v1.1.12",
+      "published_at": "2026-02-06T05:03:10Z",
+      "body": "# Changelog\r\n\r\nAll notable changes to this project will be documented in this file.\r\n\r\nThe format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).\r\n\r\n## [1.1.12] - 2026-02-06\r\n\r\n### Added\r\n- Dynamic projects list fetched from GitHub repositories.\r\n- GitHub social preview images for project cards and popups.\r\n- Automatic team listing from GitHub contributors (creator + contributors).\r\n- Contributor profile buttons linking to GitHub profiles.\r\n- Display names and bios pulled from GitHub profiles.\r\n\r\n### Fixed\r\n- Resolved GitHub API rate-limit fallback by parsing repository HTML.\r\n- Improved popup data binding for project details.\r\n- Smoother button hover transitions.\r\n\r\n### Removed\r\n- Static project cards and hardcoded team members.\r\n- Team details popup in About page.",
+      "assets": []
+    }
+  },
+  "contributors": [
+    {
+      "login": "norbertbaricz",
+      "name": "MaxUltimat3",
+      "role": "Creator"
+    }
+  ]
+}

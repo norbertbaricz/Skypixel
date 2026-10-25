@@ -1,131 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#121212">
-    <meta name="description" content="Meet the talented Skypixel team - passionate developers and creators building innovative projects and software solutions.">
-    <meta name="keywords" content="Skypixel team, developers, MaxUltimat3, creative team, software developers">
-    <meta name="author" content="Skypixel Team">
-    <meta property="og:title" content="About Us - Skypixel Team">
-    <meta property="og:description" content="Meet the passionate team behind Skypixel's innovative projects.">
-    <meta property="og:type" content="website">
-    <meta property="og:image" content="/images/logo.png">
-    <title>About Us - Skypixel</title>
-    <link rel="icon" type="image/png" href="/images/logo.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/style.css?v=<%= assetVersion %>">
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" media="print" onload="this.media='all'" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous">
-</head>
-<body class="has-sticky-footer">
-    <div id="loader-wrapper">
-        <div class="loader-content">
-            <div id="loading-text-animation"></div>
-        </div>
+<%- include('partials/head') %>
+<section class="page-hero container about-hero">
+    <p class="eyebrow hero-enter">THE PERSON BEHIND THE PROJECTS</p>
+    <h1 class="hero-enter delay-1">Behind the code.<br> <span class="gold-text">Inside Skypixel.</span></h1>
+    <p class="page-description hero-enter delay-2">A little about <%= creatorName %>, the ideas behind the tools, and the identity that connects them.</p>
+</section>
+<section class="container about-section" aria-labelledby="about-intro">
+    <aside class="about-profile reveal" aria-label="<%= creatorName %>, creator of Skypixel Framework">
+        <div class="about-profile-art"><span class="profile-orbit" aria-hidden="true"></span><%- include('partials/brand-logo', {size:160, altText:'Skypixel Framework SP emblem', eager:true}) %></div>
+        <p class="eyebrow">CODE · CREATE · REFINE</p>
+        <h2><%= creatorName %></h2>
+        <p class="profile-role">Creator of Skypixel Framework</p>
+        <div class="profile-stack" aria-label="Working with"><span>Java</span><span>C#</span><span>JavaScript</span></div>
+        <a class="text-link" href="https://github.com/<%= username %>" target="_blank" rel="noopener noreferrer">Follow the work <%- icon('arrow') %></a>
+    </aside>
+    <div class="about-copy reveal">
+        <p class="eyebrow">HELLO, I'M <%= creatorName.toUpperCase() %></p>
+        <h2 id="about-intro">Curiosity is where<br> <span class="gold-text">it usually begins.</span></h2>
+        <p>I build tools for the things I enjoy working with: Minecraft servers, Windows applications, and Discord communities. A project often starts with a small question — could this be easier to manage, clearer to understand, or more useful?</p>
+        <p>That question can turn into a Java plugin, a C# desktop application, or a JavaScript bot. The technologies change with the problem. What connects the work is the process of taking an idea, making it work, and refining the details that people interact with.</p>
+        <p>Skypixel Framework gives those ideas a shared home. Each repository has its own purpose and personality, while this website brings the collection together so you can understand what a project does and follow its progress.</p>
+        <p class="about-closing">There is always more to learn, another detail to improve, and another idea waiting to become something useful.</p>
+        <div class="about-actions"><a class="button button-gold" href="/projects">Explore what I'm building <%- icon('right') %></a><a class="text-link" href="/updates">Follow the updates <%- icon('arrow') %></a></div>
     </div>
-
-    <div class="page-blur" aria-hidden="true"></div>
-    <main id="main-content" class="page-layout" role="main">
-        <nav class="navbar">
-            <div class="container">
-                <div class="nav-menu">
-                    <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-dropdown">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </button>
-                    <div id="nav-dropdown" class="nav-dropdown" role="menu" aria-hidden="true">
-                        <a href="/projects" class="btn" role="menuitem">
-                            <i class="fas fa-briefcase" aria-hidden="true"></i>
-                            View Projects
-                        </a>
-                        <a href="/about" class="btn btn-secondary" role="menuitem">
-                            <i class="fas fa-users" aria-hidden="true"></i>
-                            About Us
-                        </a>
-                    </div>
-                </div>
-                <a href="/" class="nav-brand">Skypixel</a>
-            </div>
-        </nav>
-        <div class="scroll-indicator scroll-indicator--side" aria-hidden="true">
-            <span></span>
-        </div>
-        <section id="about" class="about section-padding fade-in-scroll">
-            <div class="container">
-                <h2>MEET THE TEAM</h2>
-
-                <% const teamCategories = teamData?.categories || { creator: [], contributors: [] }; %>
-
-                <% if (teamCategories.creator.length) { %>
-                    <div class="team-category category-lead">
-                        <div class="category-header">
-                            <h3>Creator</h3>
-                            <p>Leading the vision and shaping every Skypixel project from the ground up.</p>
-                        </div>
-                        <div class="team-grid">
-                            <% teamCategories.creator.forEach((member, index) => { %>
-                                <div class="team-card fade-in-scroll" style="animation-delay: <%= index * 0.1 %>s;" data-team-card
-                                    data-title="<%= member.name %>"
-                                    data-role="<%= member.role %>"
-                                    data-description="<%= member.description %>"
-                                    data-image="<%= member.avatar %>"
-                                    data-url="<%= member.profileUrl %>">
-                                    <img src="<%= member.avatar %>" alt="<%= member.name %>" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/200x200/252525/e0e0e0?text=Image+Error';">
-                                    <span class="team-badge badge-lead">Creator</span>
-                                    <h4><%= member.name %></h4>
-                                    <p><%= member.description %></p>
-                                    <div class="project-buttons">
-                                        <a href="<%= member.profileUrl %>" class="btn" target="_blank" rel="noopener"><i class="fab fa-github"></i> GitHub</a>
-                                    </div>
-                                </div>
-                            <% }); %>
-                        </div>
-                    </div>
-                <% } %>
-
-                <% if (teamCategories.contributors.length) { %>
-                    <div class="team-category category-engineering">
-                        <div class="category-header">
-                            <h3>Contributors</h3>
-                            <p>Everyone who contributed to Skypixel repositories and helped ship the projects.</p>
-                        </div>
-                        <div class="team-grid">
-                            <% teamCategories.contributors.forEach((member, index) => { %>
-                                <div class="team-card fade-in-scroll" style="animation-delay: <%= (index + 2) * 0.1 %>s;" data-team-card
-                                    data-title="<%= member.name %>"
-                                    data-role="<%= member.role %>"
-                                    data-description="<%= member.description %>"
-                                    data-image="<%= member.avatar %>"
-                                    data-url="<%= member.profileUrl %>">
-                                    <img src="<%= member.avatar %>" alt="<%= member.name %>" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/200x200/252525/e0e0e0?text=Image+Error';">
-                                    <span class="team-badge badge-engineering">Contributor</span>
-                                    <h4><%= member.name %></h4>
-                                    <p><%= member.description %></p>
-                                    <div class="project-buttons">
-                                        <a href="<%= member.profileUrl %>" class="btn" target="_blank" rel="noopener"><i class="fab fa-github"></i> GitHub</a>
-                                    </div>
-                                </div>
-                            <% }); %>
-                        </div>
-                    </div>
-                <% } %>
-
-                <% if (!teamCategories.creator.length && !teamCategories.contributors.length) { %>
-                    <div class="team-category category-engineering">
-                        <div class="category-header">
-                            <h3>No Team Members Found</h3>
-                            <p>We couldn't load contributors from GitHub right now. Please check back soon.</p>
-                        </div>
-                    </div>
-                <% } %>
-            </div>
-        </section>
-    </main>
-    <script defer src="/js/script.js?v=<%= assetVersion %>"></script>
-    <script defer src="/js/about-script.js?v=<%= assetVersion %>"></script>
-</body>
-</html>
+</section>
+<section class="container about-principles" aria-labelledby="principles-title">
+    <div class="section-heading reveal"><div><p class="eyebrow">WHAT MATTERS TO ME</p><h2 id="principles-title">The thinking behind the work.</h2><p>Different projects. A few ideas I keep coming back to.</p></div></div>
+    <div class="principle-grid">
+        <article class="principle-card reveal"><span class="principle-icon"><%- icon('bolt') %></span><h3>Start with a purpose.</h3><p>A useful project solves a real problem. I like tools that make a setup easier, support a community, or give people more control over the things they use.</p></article>
+        <article class="principle-card reveal"><span class="principle-icon"><%- icon('code') %></span><h3>Leave room to grow.</h3><p>Publishing a repository is one step in an ongoing process. New ideas, clearer documentation, and feedback can all shape what comes next.</p></article>
+        <article class="principle-card reveal"><span class="principle-icon"><%- icon('spark') %></span><h3>Care for the details.</h3><p>How something feels matters alongside how it works. Clear controls, readable information, and a consistent identity help make a tool easier to enjoy.</p></article>
+    </div>
+    <div class="about-invitation reveal"><div><p class="eyebrow">THE NEXT IDEA</p><h2>Have something in mind?</h2><p>Explore the repositories, try a project, or share a suggestion through its GitHub issues.</p></div><a class="button button-outline" href="https://github.com/<%= username %>?tab=repositories" target="_blank" rel="noopener noreferrer">Find a repository <%- icon('arrow') %></a></div>
+</section>
+<% const contributors=(snapshot.contributors||[]).filter(member=>member.login!==username); if(contributors.length){ %><section class="container contributor-section"><h2>Contributors</h2><div class="contributors"><% contributors.forEach(member=>{ %><a href="https://github.com/<%= member.login %>" target="_blank" rel="noopener noreferrer"><strong><%= member.name %></strong><%- icon('arrow') %></a><% }); %></div></section><% } %>
+<%- include('partials/footer') %>

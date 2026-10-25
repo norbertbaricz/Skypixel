@@ -1,215 +1,136 @@
-# 🌟 Skypixel Official Website
+# Skypixel Framework
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org/)
-[![Express.js](https://img.shields.io/badge/Express.js-5.1.0-blue)](https://expressjs.com/)
+The project hub by **MaxUltimat3**. Gold, white, black, the Skypixel SP identity, and the automatic animated loading screen remain the identity of the site.
 
-Welcome to the official Skypixel website repository! This is where passion for creativity and innovative projects comes together. Explore our portfolio, meet our talented team, and discover what makes Skypixel unique.
+## Run
 
-## 🚀 About Skypixel
+Use Node.js 22.13 or later and npm 9 or later. Node.js 24 is recommended for the built-in TypeScript/SQLite test support.
 
-Skypixel is a team dedicated to exploring and implementing creative ideas across various domains. Our website serves as a platform to showcase the work of our team members and the exciting projects we are involved in. We believe in collaboration, innovation, and pushing the boundaries of creativity.
-
-## ✨ Features
-
-- **📱 Responsive Design** - Fully optimized for all devices (mobile, tablet, desktop)
-- **🎨 Modern UI/UX** - Beautiful dark theme with smooth animations
-- **⚡ High Performance** - Optimized loading times with compression and caching
-- **🔒 Security First** - Helmet.js protection, rate limiting, and CSP
-- **🎯 SEO Optimized** - Meta tags, Open Graph, and semantic HTML
-- **♿ Accessibility** - WCAG compliant with ARIA labels
-- **📊 Project Showcase** - Dynamic project cards with GitHub release integration
-- **👥 Team Profiles** - Meet our talented team members
-
-## 🛠️ Technologies Used
-
-### Frontend
-- **HTML5** - Semantic markup with EJS templating
-- **CSS3** - Custom properties, animations, responsive design
-- **JavaScript (ES6+)** - Modern vanilla JS with Intersection Observer API
-
-### Backend
-- **Node.js** (≥18.0.0) - Runtime environment
-- **Express.js** (5.1.0) - Web framework
-- **EJS** - Templating engine
-- **Helmet.js** - Security headers
-- **Compression** - Gzip compression
-- **Morgan** - HTTP request logger
-- **Express Rate Limit** - API rate limiting
-
-### External Services
-- **GitHub API** - Fetch latest release versions
-- **Unsplash** - Random hero background images
-- **Font Awesome** - Icon library
-- **Google Fonts** - Montserrat & Open Sans
-
-## 📋 Prerequisites
-
-Before you begin, ensure you have the following installed:
-
-- [Node.js](https://nodejs.org/) (version 18.0.0 or higher)
-- [npm](https://www.npmjs.com/) (version 9.0.0 or higher)
-- Git (for cloning the repository)
-
-## 🔧 Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/norbertbaricz/Skypixel.git
-   cd Skypixel
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Configure environment variables**
-   ```bash
-   cp .env.example .env
-   ```
-   
-   Edit `.env` file with your settings:
-   ```env
-   PORT=3000
-   NODE_ENV=development
-   TRUST_PROXY=false
-   ```
-
-4. **Start the development server**
-   ```bash
-   npm run dev
-   ```
-
-5. **Open your browser**
-   
-   Navigate to [http://localhost:3000](http://localhost:3000)
-
-## 🚀 Usage
-
-### Development Mode
 ```bash
-npm run dev
-```
-Runs the server with nodemon for auto-reloading and debugging enabled.
-
-### Production Mode
-```bash
+npm install
+cp .env.example .env
 npm start
 ```
-Runs the optimized production server with proper security headers.
 
-### Linting
+Open `http://localhost:3000` for the complete Express website and APIs. On Windows, copy the environment file in File Explorer or PowerShell.
+
 ```bash
-npm run lint
-```
-Checks code quality with ESLint.
-
-## 📁 Project Structure
-
-```
-Skypixel/
-├── app.js                 # Main Express application
-├── package.json           # Dependencies and scripts
-├── .env.example          # Environment variables template
-├── .gitignore            # Git ignore rules
-├── README.md             # This file
-├── public/               # Static assets
-│   ├── css/
-│   │   └── style.css     # Main stylesheet
-│   ├── images/           # Project images and logos
-│   └── js/
-│       ├── script.js     # Main JavaScript
-│       ├── projects-script.js
-│       └── about-script.js
-└── views/                # EJS templates
-    ├── index.ejs         # Homepage
-    ├── projects.ejs      # Projects page
-    └── about.ejs         # About page
+npm run dev:express  # Express/EJS development with automatic restart
+npm run dev         # Hosted Worker development through Vinext/Vite
+npm test            # Offline behavior, quota, SQL lease, loader, and HTTP tests
+npm run build       # Build the hosted Worker and its assets into dist/
+npm run build:static # Optional snapshot-only export into dist-static/
 ```
 
-## 🎯 Key Optimizations
+The original Express, EJS views, and vanilla browser scripts are retained. The hosted edition uses the supplied Sites Vinext Worker infrastructure to serve those same EJS-generated pages and a shared backend. The portfolio UI does not download a React application.
 
-### Performance
-- ✅ **GitHub API Caching** - 10-minute cache for release data
-- ✅ **Gzip Compression** - Reduces bandwidth by ~70%
-- ✅ **Static Asset Caching** - Browser cache for CSS/JS/images
-- ✅ **Lazy Loading** - Images load on-demand
-- ✅ **Intersection Observer** - Efficient scroll animations
-- ✅ **Event Delegation** - Optimized event handlers
+## Four distinct pages
 
-### Security
-- ✅ **Helmet.js** - Security headers (CSP, XSS protection)
-- ✅ **Rate Limiting** - 300 requests per 15 minutes
-- ✅ **HTTPS Enforcement** - Production HSTS enabled
-- ✅ **Input Validation** - Prevents XSS and injection
+| Page | Purpose |
+| --- | --- |
+| Home | A Skypixel introduction and three routes into the hub; no duplicated project cards |
+| Projects | The complete collection with search, automatic categories, sorting, grid/list view, and detailed project dialogs |
+| Updates | The latest published release per project, project filtering, version notes, downloads, and full release-history links |
+| About | An expanded MaxUltimat3 profile, the story behind Skypixel, and three principles behind the work |
 
-### SEO & Accessibility
-- ✅ **Meta Tags** - Comprehensive Open Graph and Twitter Cards
-- ✅ **Semantic HTML** - Proper heading hierarchy
-- ✅ **ARIA Labels** - Screen reader support
-- ✅ **Alt Text** - All images have descriptive alt attributes
-- ✅ **Mobile-First** - Responsive design principles
+The public GitHub login remains `norbertbaricz` because it identifies the repository source. Display text, social metadata, contributor fallback, and the catalog use MaxUltimat3. No profile-name API is requested.
 
-## 🌐 Pages
+## Automatic new projects
 
-### Homepage (`/`)
-- Hero section with animated background
-- Quick navigation to Projects and About pages
-- Smooth scroll animations
+Every public repository owned by the configured GitHub account is included, including forks and archived repositories. Discovery follows pages of 100 repositories and deduplicates by repository ID. A partial or failed discovery never replaces a complete saved collection.
 
-### Projects (`/projects`)
-- Categorized project showcase (Popular, New, EOL)
-- GitHub release version integration
-- Detailed project modals with descriptions
-- Direct download/archive links
+A new repository needs no website entry. Its GitHub description, language, topics, homepage, branch, stars, fork status, and archive status populate the card and details. Topics, repository name, and description infer Minecraft, Discord, Windows, Web, or Developer tools. Filters are rebuilt from actual categories. Unknown projects get the corresponding category symbol and a README link immediately; release enrichment follows within the available budget.
 
-### About (`/about`)
-- Team member profiles
-- Role-based categorization
-- Interactive team cards
+`public/js/catalog.js` contains optional editorial overrides for the original five projects. These improve their existing descriptions and preserve verified local logos; they are not an inclusion list. New projects work without adding an override.
 
-## 🔐 Environment Variables
+## A shared, conservative GitHub synchronizer
 
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `PORT` | Server port | 3000 | No |
-| `NODE_ENV` | Environment mode | development | No |
-| `TRUST_PROXY` | Enable trust proxy | false | No |
-| `GITHUB_TOKEN` | GitHub API token | - | No* |
-| `GITHUB_TIMEOUT_MS` | GitHub fetch timeout (ms) | 7000 | No |
+Visitors request the site's own API. Browser scripts never contact the GitHub API, so traffic does not multiply upstream polling.
 
-*Optional but recommended for higher API rate limits (60 → 5000 requests/hour)
+`lib/sync-core.mjs` is the synchronization engine used by both hosting adapters:
 
-## 🤝 Contributing
+- Discover repositories about every ten minutes, on demand or through the Express background timer.
+- Share one in-flight job in Express. The hosted Worker uses an atomic D1 lease so separate isolates and concurrent visitors share one refresh.
+- Reserve each attempted request durably **before** fetching. A restart does not reset the rolling budget.
+- Allow at most **40 attempts per rolling hour** by default, including failures and conditional requests. Keep five requests in reserve when GitHub supplies remaining-quota headers.
+- Request endpoints sequentially. Use ETags and 304 responses to reuse cached data. Persist ETags, endpoint bodies, negative release lookups, quota headers, retry state, and the last catalog.
+- Cache release details and “no release” results for six hours. Enrich at most five projects per sync, choosing new or least-recently-checked projects first. Repository discovery takes priority over release details.
+- Honor `Retry-After` and reset headers, and increase backoff after repeated failures. A forced Express refresh still respects quota and cooldown.
+- Keep individual requests under seven seconds and stop starting requests after a twenty-second job budget.
+- Reapply current editorial descriptions to restored catalogs without spending GitHub quota. Repository metadata, releases, and the durable budget are preserved.
+- Serve saved projects and releases immediately during an outage, cooldown, or enrichment backlog. A shared-storage failure stops upstream fetching rather than starting independent pollers.
 
-Currently, this repository is primarily used to host the website files. However, we welcome feedback and suggestions!
+GitHub can apply secondary limits and an IP/token can be shared by other software. No integration can guarantee that GitHub will never return a limit response. This implementation stops, preserves the site, and resumes after the permitted interval. Upstream quota headers are authoritative. A server-only token can improve the available GitHub quota; it is optional, never bundled into the client, and does not raise this site's conservative request budget.
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+Reference: [GitHub REST rate-limit guidance](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api) and [REST API best practices](https://docs.github.com/en/rest/using-the-rest-api/best-practices-for-using-the-rest-api).
 
-## 📝 License
+## Storage and hosting
 
-This project is licensed under the [MIT License](https://opensource.org/licenses/MIT). See the `LICENSE` file for details.
+The hosted Worker uses the `DB` D1 binding declared in `.openai/hosting.json`. `db/schema.ts` and the committed `drizzle/` migration define one owner-keyed state row with its payload and lease. Sites applies the hosted migration during publication. The migration contains schema only; the verified fallback is application data in `repository-snapshot.json`.
 
-## 📧 Contact
+For local Worker development, build once and apply each new migration once:
 
-For inquiries or requests, please contact us through:
-- Website: [Skypixel Official Site](https://skypixel.com)
-- GitHub: [@norbertbaricz](https://github.com/norbertbaricz)
+```bash
+npm run build
+node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_hot_cammi.sql
+npm run dev
+```
 
-## 🙏 Acknowledgments
+`npm start` uses the Express adapter with an atomic disk cache at `.cache/github-catalog.json`. Deploy one Express process for a given cache; use a persistent writable directory or volume. Multi-instance hosting should use the shared Worker/D1 adapter. A read-only Express filesystem retains an in-memory catalog, but restart persistence requires writable storage.
 
-- **Font Awesome** - Icon library
-- **Google Fonts** - Typography
-- **Unsplash** - Background images
-- **Express.js Community** - Framework and middleware
+The optional static export is a snapshot. It serves saved JSON from its own origin and performs **no** direct GitHub requests. Use the Worker or Express runtime for automatic discovery. This site's hosted edition runs the Worker backend.
 
----
+Pages are generated from `views/` into `generated/pages.mjs` for Worker hosting. `generated/catalog.mjs` is the ESM form of the browser's shared catalog utilities. Rebuild after editing EJS or catalog helpers. Both `npm run dev` and `npm run build` regenerate these modules. Original Java `src/`, source images, and `LICENSE.txt` are retained.
 
-**Made with ❤️ by the Skypixel Team**
+## Loading, responsiveness, and assets
 
-Thank you for visiting! We hope you enjoy exploring our projects and getting to know the Skypixel team!
+The loading screen waits for page resources with a 400 ms minimum and seven-second automatic recovery. It has no Skip, Replay, Escape dismissal, click dismissal, or manual completion API. An independent boot recovery prevents a missing interaction script from trapping the page. Reduced-motion visitors see static brand text.
+
+The four pages have been checked at 15 viewport sizes from 320 to 3840 px, including 844 × 390 landscape and the 850/851 px navigation boundary. All 60 checks passed for horizontal overflow, removed guide links, image loading, and centered desktop navigation/footer. These are browser layout checks, not physical-device certification. The mobile menu scrolls within short screens. Dialogs, release files, readable body text, keyboard tabs, visible focus, and motion preferences are preserved.
+
+The 64 × 64 original is retained as a source asset. A faithful high-resolution restoration is now displayed through 256/512 px WebP variants with responsive image selection; forced pixelated rendering is removed. The favicon and touch icon use the restored mark. [Logo assets and restoration prompt](docs/logo-assets.md).
+
+Original `public/images/logo.png` SHA-256: `a2d02f54a15e57e2e425a6c87ffd6d7e433cf948647eac8850836b5fe57f8acd`.
+
+| Project | Verified local logo source |
+| --- | --- |
+| BoosterX | `assets/boosterx-mark.png`, Git blob `aded4410db3e3b80ed2e593b34a158cb4f91ec0c` |
+| Server Launcher | `Assets/icon.png`, Git blob `c6b4b97c72da0e79627e41ddc3db09c99b17b7a4` |
+| Skypixel | Restored `logo-256.webp` / `logo-512.webp`; original `logo.png` retained unchanged |
+
+DakotaAC and Puro use fallback symbols. Images load locally with dimensions and async decoding. The original background source remains; optimized WebP versions serve the interface. No external font or icon library is required.
+
+## API
+
+| Route | Purpose |
+| --- | --- |
+| `GET /api/projects` | Complete catalog, stats, categories, release data, and sync metadata |
+| `GET /api/projects?q=launcher&category=Minecraft&sort=updated` | Combined filtering |
+| `GET /api/projects?limit=2&page=2` | Optional pagination |
+| `GET /api/projects/DakotaAC` | One project's details and release metadata |
+| `GET /api/releases?project=Puro&limit=5` | Latest release per project, optionally filtered |
+| `GET /api/status` | Sync status, cooldown, durable budget, and cache state |
+| `GET /health` | Service health |
+| `POST /contact` | Express-only SMTP delivery when configured |
+
+Allowed sorts are `featured`, `updated`, `stars`, and `name`. Omitting pagination returns all matches. APIs return JSON errors, response ETags, and bounded query parameters. Live status responses bypass browser caching. HEAD responses have no body. Storage failures report a degraded integration state while preserving the fallback catalog. Status responses do not expose a token or filesystem path. Express adds request limits, compression, security headers, validated SMTP, and graceful shutdown. Hosted HTML and APIs have restrictive same-origin script and connection policies.
+
+## Configuration
+
+| File | Settings |
+| --- | --- |
+| `public/js/catalog.js` | Public alias, GitHub owner, editorial overrides, identity symbols, shared filtering |
+| `lib/sync-core.mjs` | Central quota, polling, release TTLs, timeouts, retries, enrichment bounds |
+| `lib/github.js` | Express environment configuration and atomic disk adapter |
+| `worker/catalog.ts` | Hosted D1 persistence and atomic refresh lease |
+| `public/js/loader.js` | Loading minimum, watchdog, typing and fade timings |
+| `public/css/style.css` | Gold/dark palette, typography, layout, responsive behavior, motion |
+| `.env.example` | Optional Express settings; no credentials are supplied |
+
+The Worker reads an optional `GITHUB_TOKEN` from its runtime secrets. Its owner and public alias come from `catalog.js`; its synchronization defaults come from `sync-core.mjs`. Express can override `GITHUB_USERNAME`, `CREATOR_ALIAS`, `PROJECTS_REFRESH_MS`, `GITHUB_TIMEOUT_MS`, `GITHUB_RETRY_MS`, `GITHUB_HOURLY_BUDGET`, and `GITHUB_CACHE_FILE` through `.env`. Set `SITE_URL` at build time for canonical social links, robots, and sitemap. The site's existing identity and audience are preserved in the hosting configuration.
+
+## Version 3.1 validation
+
+23 offline tests pass, including new-repository discovery, 101-repository pagination, restart persistence, budget and upstream-limit pauses, 50 simultaneous hosted visitors, shared-storage failures, current editorial text after cache hydration, response ETags/HEAD, the automatic loader, and Express HTTP routes. TypeScript checking and both build modes pass. The production GitHub integration has also been read back successfully: a fresh catalog, persistent cache, no integration error, and a durable budget below its configured limit.
+
+The former guide page and its navigation entries are removed. Its URL returns the normal 404 page. Home, Projects, Updates, and About share the same container edges; desktop navigation and footer text are centered independently of the logo and GitHub button widths.
