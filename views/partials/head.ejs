@@ -2,9 +2,18 @@
 <html lang="en" class="dark">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#090909">
     <meta name="color-scheme" content="dark">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Skypixel">
+    <style id="critical-theme">
+        /* Paint the canvas before external styles, scripts, and the loader arrive. */
+        :root { --bg: #090909; --text: #f7f5ef; color-scheme: dark; background-color: var(--bg); color: var(--text); }
+        html,body { margin: 0; min-height: 100%; background-color: var(--bg); color: var(--text); }
+    </style>
     <meta name="description" content="Skypixel Framework by <%= creatorName %>. Explore the projects, follow their progress, and discover the ideas behind Skypixel.">
     <meta name="author" content="<%= creatorName %>">
     <meta property="og:title" content="<%= title %>">
@@ -15,11 +24,13 @@
     <title><%= title %></title>
     <link rel="icon" type="image/png" href="/images/favicon.png">
     <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.webmanifest?v=<%= assetVersion %>" crossorigin="use-credentials">
     <link rel="preload" as="image" type="image/webp" href="<%= CONFIG.brandLogo %>">
     <link rel="stylesheet" href="/css/style.css?v=<%= assetVersion %>">
     <script src="/js/boot.js?v=<%= assetVersion %>"></script>
     <script defer src="/js/loader.js?v=<%= assetVersion %>"></script>
     <script defer src="/js/catalog.js?v=<%= assetVersion %>"></script>
+    <script defer src="/js/controls.js?v=<%= assetVersion %>"></script>
     <script defer src="/js/script.js?v=<%= assetVersion %>"></script>
     <% if (page === 'projects') { %><script defer src="/js/projects-script.js?v=<%= assetVersion %>"></script><% } %>
     <% if (page === 'about') { %><script defer src="/js/about-script.js?v=<%= assetVersion %>"></script><% } %>

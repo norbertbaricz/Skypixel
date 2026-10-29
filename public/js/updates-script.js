@@ -6,6 +6,7 @@
     const esc = C.escapeHtml;
     function render() {
         const releases = C.getReleases(app.snapshot.projects).filter(release => !select.value || release.projectName === select.value);
+        app.disposeReveals(feed);
         feed.innerHTML = releases.map(release => {
             const project = app.snapshot.projects.find(p => p.name === release.projectName);
             const excerpt = C.releaseExcerpt(release.body);
@@ -18,6 +19,7 @@
         const selected = select.value;
         select.innerHTML = '<option value="">All projects</option>' + app.snapshot.projects.filter(p => p.release).sort((a,b) => a.title.localeCompare(b.title)).map(p => `<option value="${esc(p.name)}">${esc(p.title)}</option>`).join('');
         if ([...select.options].some(option => option.value === selected)) select.value = selected;
+        window.SkypixelSelect?.refresh(select);
         render();
     }
     select.addEventListener('change', render);

@@ -31,6 +31,7 @@ const PROJECT_FILTER_CONFIG = Object.freeze({
     }
     function render(updateUrl = true) {
         const projects = C.filterProjects(app.snapshot.projects, { q: search.value, category, sort: sort.value });
+        app.disposeReveals(grid);
         grid.innerHTML = projects.map(app.renderCard).join('');
         grid.classList.toggle('is-list', view === 'list');
         document.getElementById('empty-state').hidden = projects.length > 0;
@@ -38,6 +39,7 @@ const PROJECT_FILTER_CONFIG = Object.freeze({
         filters.querySelectorAll('[data-category-filter]').forEach(button => { const active = button.dataset.categoryFilter === category; button.classList.toggle('active', active); button.setAttribute('aria-pressed', String(active)); });
         document.querySelectorAll('[data-view]').forEach(button => { const active = button.dataset.view === view; button.classList.toggle('active', active); button.setAttribute('aria-pressed', String(active)); });
         app.reveal(grid);
+        window.SkypixelSelect?.refresh(sort);
         if (updateUrl) saveUrl();
     }
     document.getElementById('project-filters').addEventListener('submit', event => event.preventDefault());
@@ -46,7 +48,7 @@ const PROJECT_FILTER_CONFIG = Object.freeze({
     document.querySelector('.view-switch').addEventListener('click', event => { const button = event.target.closest('[data-view]'); if (button) { view = button.dataset.view; render(); } });
     document.getElementById('reset-filters').addEventListener('click', () => { category = PROJECT_FILTER_CONFIG.defaultCategory; search.value = ''; sort.value = PROJECT_FILTER_CONFIG.defaultSort; render(); search.focus(); });
     document.addEventListener('keydown', event => {
-        if (event.key === PROJECT_FILTER_CONFIG.searchShortcut && !event.ctrlKey && !event.metaKey && !event.altKey && !document.documentElement.classList.contains('is-loading') && !event.target.closest('input,textarea,select,[contenteditable="true"],dialog')) { event.preventDefault(); search.focus(); }
+        if (event.key === PROJECT_FILTER_CONFIG.searchShortcut && !event.ctrlKey && !event.metaKey && !event.altKey && !document.documentElement.classList.contains('is-loading') && !event.target.closest('input,textarea,select,[role="combobox"],[contenteditable="true"],dialog')) { event.preventDefault(); search.focus(); }
     });
     document.addEventListener('skypixel:catalog', () => { updateCategories(); render(false); });
     updateCategories(); render(false);

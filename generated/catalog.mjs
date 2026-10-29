@@ -24,6 +24,10 @@ const catalog = (function () {
 
     // Editorial fields can evolve independently of GitHub metadata and quota.
     const PRESENTATION_FIELDS = Object.freeze(['title','category','theme','icon','tagline','summary','overview','features','stack','gettingStarted']);
+    const LOGO_CONFIG = Object.freeze({ maxBytes: 512 * 1024, maxPathLength: 300 });
+    const PROJECT_ALIASES = Object.freeze({ ServerLauncher: 'Server-Launcher' });
+    const LOCAL_LOGOS = Object.freeze({ Nexus: '/images/projects/nexus.png' });
+    const detailsFor = name => DETAILS[name] || DETAILS[PROJECT_ALIASES[name]];
 
     const DETAILS = Object.freeze({
         DakotaAC: {
@@ -118,11 +122,56 @@ const catalog = (function () {
 
 
 
-    function projectIdentity(project, eager = false) {
+    function configuredLogo(project) {
         const owner = String(project.fullName || '').split('/')[0];
-        const logo = !owner || owner.toLowerCase() === CONFIG.githubUsername.toLowerCase() ? DETAILS[project.name]?.logo : '';
-        const fallback = icon(project.icon);
-        return `<span class="project-logo" aria-hidden="true">${logo ? `<img class="project-logo-image" src="${escapeHtml(logo)}"${logo === CONFIG.brandLogo ? ` srcset="${escapeHtml(CONFIG.brandLogo)} 256w, ${escapeHtml(CONFIG.brandLogoLarge)} 512w" sizes="64px"` : ''} width="64" height="64" alt="" loading="${eager ? 'eager' : 'lazy'}" decoding="async"><span class="project-logo-fallback" hidden>${fallback}</span>` : fallback}</span>`;
+        return !owner || owner.toLowerCase() === CONFIG.githubUsername.toLowerCase() ? (detailsFor(project.name)?.logo || LOCAL_LOGOS[project.name] || '') : '';
+    }
+    function safeProjectLogo(project) {
+        const local = configuredLogo(project);
+        if (local) return local;
+        try {
+            const url = new URL(project.logo);
+            const [owner, name] = String(project.fullName || '').split('/');
+            const prefix = `/${encodeURIComponent(owner)}/${encodeURIComponent(name)}/`;
+            return owner && name && url.protocol === 'https:' && url.hostname === 'raw.githubusercontent.com' && !url.username && !url.password && !url.port && url.pathname.toLowerCase().startsWith(prefix.toLowerCase()) && /\.(png|webp|svg|ico|jpe?g)$/i.test(url.pathname) ? url.href : '';
+        } catch { return ''; }
+    }
+    function logoScore(entry, repositoryName) {
+        const path = String(entry?.path || '');
+        if (entry?.type !== 'blob' || entry.mode === '120000' || !path || path.length > LOGO_CONFIG.maxPathLength || /(^|\/)\.\.?($|\/)|[\\\x00-\x1f]/.test(path) || !/\.(png|webp|svg|ico|jpe?g)$/i.test(path) || !Number.isFinite(entry.size) || entry.size < 1 || entry.size > LOGO_CONFIG.maxBytes) return -1;
+        if (/(^|\/)(node_modules|vendor|packages|tests?|screenshots?)(\/|$)|notification|badge|splash|background|banner|screenshot/i.test(path)) return -1;
+        const filename = path.split('/').at(-1).replace(/\.[^.]+$/, '').toLowerCase();
+        const compactName = String(repositoryName).replace(/[^a-z0-9]/gi, '').toLowerCase();
+        const compactFile = filename.replace(/[^a-z0-9]/gi, '');
+        const named = compactName.length > 1 && compactFile.includes(compactName);
+        if (!named && !/(?:^|[-_.])(logo|icon|favicon|mark)(?:$|[-_.0-9])/.test(filename)) return -1;
+        let score = named ? 90 : 0;
+        score += /logo/.test(filename) ? 120 : /favicon/.test(filename) ? 35 : /icon/.test(filename) ? 85 : 50;
+        score += /(?:192|256|512)/.test(filename) ? 15 : 0;
+        score += /\.(png|webp)$/i.test(path) ? 10 : /\.svg$/i.test(path) ? 8 : 0;
+        score += /(^|\/)(public|assets|images|resources)(\/|$)/i.test(path) ? 8 : 0;
+        return score - path.split('/').length * 2;
+    }
+    function chooseRepositoryLogo(repo, response) {
+        if (!Array.isArray(response?.tree)) return null;
+        let candidate = null, bestScore = -1;
+        for (const entry of response.tree) {
+            const score = logoScore(entry, repo.name);
+            if (score >= 0 && (score > bestScore || (score === bestScore && entry.path.localeCompare(candidate.path) < 0))) { candidate = entry; bestScore = score; }
+        }
+        if (!candidate) return null;
+        const owner = repo.owner?.login;
+        if (!/^[a-z0-9-]+$/i.test(owner || '') || !/^[a-z0-9_.-]+$/i.test(repo.name || '')) return null;
+        const branch = repo.default_branch || 'HEAD';
+        const path = candidate.path.split('/').map(encodeURIComponent).join('/');
+        const version = /^[a-f0-9]{40,64}$/i.test(candidate.sha || '') ? `?v=${candidate.sha}` : '';
+        return `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo.name)}/${encodeURIComponent(branch)}/${path}${version}`;
+    }
+    function projectIdentity(project, eager = false) {
+        const logo = safeProjectLogo(project);
+        const initials = String(project.title || project.name || 'SP').replace(/[^a-z0-9]/gi, '').slice(0,2).toUpperCase();
+        const fallback = `<span class="project-monogram">${escapeHtml(initials)}</span><span class="project-type-icon">${icon(project.icon)}</span>`;
+        return `<span class="project-logo" aria-hidden="true">${logo ? `<img class="project-logo-image" src="${escapeHtml(logo)}"${logo === CONFIG.brandLogo ? ` srcset="${escapeHtml(CONFIG.brandLogo)} 256w, ${escapeHtml(CONFIG.brandLogoLarge)} 512w" sizes="64px"` : ''} width="64" height="64" alt="" loading="${eager ? 'eager' : 'lazy'}" decoding="async" referrerpolicy="no-referrer">` : ''}<span class="project-logo-fallback"${logo ? ' hidden' : ''}>${fallback}</span></span>`;
     }
 
     function normalizeRelease(release) {
@@ -169,7 +218,7 @@ const catalog = (function () {
     }
     function applyPresentationOverrides(project, username = CONFIG.githubUsername) {
         const owner = String(project.fullName || '').split('/')[0] || username;
-        const curated = owner.toLowerCase() === CONFIG.githubUsername.toLowerCase() ? DETAILS[project.name] : null;
+        const curated = owner.toLowerCase() === CONFIG.githubUsername.toLowerCase() ? detailsFor(project.name) : null;
         if (!curated) return project;
         const current = { ...project };
         for (const key of PRESENTATION_FIELDS) if (curated[key] !== undefined) current[key] = curated[key];
@@ -177,7 +226,7 @@ const catalog = (function () {
     }
 
     function normalizeRepo(repo, releases = {}) {
-        const curated = repo.owner?.login?.toLowerCase() === CONFIG.githubUsername.toLowerCase() ? DETAILS[repo.name] : null;
+        const curated = repo.owner?.login?.toLowerCase() === CONFIG.githubUsername.toLowerCase() ? detailsFor(repo.name) : null;
         const category = curated?.category || classifyRepository(repo);
         const release = releases[repo.name] || null;
         return {
@@ -218,6 +267,51 @@ const catalog = (function () {
         return text.slice(0, maxLength) + (text.length > maxLength ? '…' : '');
     }
 
-    return { CONFIG, DETAILS, icon, escapeHtml, safeUrl, projectIdentity, normalizeRelease, normalizeRepo, applyPresentationOverrides, classifyRepository, buildCatalog, getStats, getReleases, filterProjects, formatDate, releaseExcerpt };
+    // A small, escaped subset of Markdown. GitHub HTML and embedded media stay inert.
+    function renderReleaseNotes(body, title = '') {
+        const inline = value => {
+            const tokens = /`([^`]+)`|\*\*([^*]+)\*\*|\[([^\]]+)\]\(([^\s)]+)\)/g;
+            let html = '', cursor = 0;
+            for (const match of value.matchAll(tokens)) {
+                html += escapeHtml(value.slice(cursor, match.index));
+                if (match[1] !== undefined) html += `<code>${escapeHtml(match[1])}</code>`;
+                else if (match[2] !== undefined) html += `<strong>${escapeHtml(match[2])}</strong>`;
+                else {
+                    const url = safeUrl(match[4]);
+                    html += url ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(match[3])}</a>` : escapeHtml(match[3]);
+                }
+                cursor = match.index + match[0].length;
+            }
+            return html + escapeHtml(value.slice(cursor));
+        };
+        const lines = String(body || '').slice(0, CONFIG.maxReleaseBodyLength).replace(/\r/g, '').split('\n');
+        const output = []; let paragraph = [], list = null, code = null;
+        const flush = () => { if (paragraph.length) { output.push(`<p>${inline(paragraph.join(' '))}</p>`); paragraph = []; } };
+        const endList = () => { if (list) { output.push(`</${list}>`); list = null; } };
+        for (const [index, line] of lines.entries()) {
+            if (/^\s*```/.test(line)) {
+                flush(); endList();
+                if (code) { output.push(`<pre><code>${escapeHtml(code.join('\n'))}</code></pre>`); code = null; } else code = [];
+                continue;
+            }
+            if (code) { code.push(line); continue; }
+            if (!line.trim()) { flush(); endList(); continue; }
+            const heading = line.match(/^\s{0,3}#{1,6}\s+(.+)$/);
+            const item = line.match(/^\s*(?:([-*+])|\d+[.)])\s+(.+)$/);
+            if (heading) {
+                flush(); endList();
+                if (index !== 0 || heading[1].trim() !== title.trim()) output.push(`<h3>${inline(heading[1])}</h3>`);
+            } else if (item) {
+                flush(); const type = item[1] ? 'ul' : 'ol';
+                if (list !== type) { endList(); output.push(`<${type}>`); list = type; }
+                output.push(`<li>${inline(item[2])}</li>`);
+            } else { endList(); paragraph.push(line); }
+        }
+        flush(); endList();
+        if (code) output.push(`<pre><code>${escapeHtml(code.join('\n'))}</code></pre>`);
+        return output.join('');
+    }
+
+    return { CONFIG, DETAILS, LOGO_CONFIG, icon, escapeHtml, safeUrl, projectIdentity, configuredLogo, safeProjectLogo, logoScore, chooseRepositoryLogo, normalizeRelease, normalizeRepo, applyPresentationOverrides, classifyRepository, buildCatalog, getStats, getReleases, filterProjects, formatDate, releaseExcerpt, renderReleaseNotes };
 })();
 export default catalog;

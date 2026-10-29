@@ -1,6 +1,6 @@
 </main>
 <footer class="site-footer"><div class="container footer-inner"><a class="brand" href="/"><%- include('brand-logo', {size:38, altText:'', eager:false}) %><span>Skypixel<small>FRAMEWORK</small></span></a><p>Built by <%= creatorName %>.<br> © <%= year %> Skypixel Framework.</p><a class="text-link" href="https://github.com/<%= username %>" target="_blank" rel="noopener noreferrer">Find me on GitHub <%- icon('arrow') %></a></div></footer>
-<dialog id="project-dialog" class="project-dialog" aria-labelledby="dialog-title"><button class="dialog-close icon-button" type="button" aria-label="Close project details"><%- icon('close') %></button><div id="dialog-content"></div></dialog>
+<dialog id="project-dialog" class="project-dialog" aria-labelledby="dialog-title"><div class="dialog-topbar"><span>PROJECT EXPLORER</span><button class="dialog-close icon-button" type="button" aria-label="Close project details" autofocus><%- icon('close') %></button></div><div id="dialog-content" tabindex="0" aria-label="Project information"></div></dialog>
 <div class="toast" role="status" aria-live="polite"></div>
 <script id="catalog-data" type="application/json"><%- bootstrap %></script>
 </body>

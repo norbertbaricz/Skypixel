@@ -39,7 +39,7 @@ app.use(helmet({
         directives: {
             defaultSrc: ["'self'"], scriptSrc: ["'self'"], scriptSrcAttr: ["'none'"],
             styleSrc: ["'self'", "'unsafe-inline'"], fontSrc: ["'self'"],
-            imgSrc: ["'self'", 'data:', 'https://avatars.githubusercontent.com'],
+            imgSrc: ["'self'", 'data:', 'https://avatars.githubusercontent.com', 'https://raw.githubusercontent.com'],
             connectSrc: ["'self'"], objectSrc: ["'none'"],
             upgradeInsecureRequests: IS_PRODUCTION ? [] : null
         }

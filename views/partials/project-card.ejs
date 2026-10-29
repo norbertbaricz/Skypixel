@@ -1,5 +1,6 @@
 <article class="project-card reveal" data-project-card="<%= project.name %>" data-category="<%= project.category %>">
     <div class="card-heading"><%- projectIdentity(project) %><div><span class="card-category"><%= project.category %><%= project.archived ? ' · Archived' : project.fork ? ' · Fork' : '' %></span><h3><%= project.title %></h3></div></div>
     <p class="card-description"><%= project.summary %></p>
+    <div class="card-meta"><span><%= project.language %></span><% if(project.release){ %><span><%= project.release.tag %></span><% } %></div>
     <div class="card-actions"><button class="button button-card" type="button" data-open-project="<%= project.name %>" aria-label="View <%= project.title %> details">View details <%- icon('right') %></button><a class="card-source icon-button" href="<%= project.htmlUrl %>" target="_blank" rel="noopener noreferrer" aria-label="View <%= project.title %> on GitHub"><%- icon('github') %></a></div>
 </article>

@@ -52,7 +52,7 @@ async function build() {
         fs.copyFileSync(path.join(ROOT,'public/robots.txt'),path.join(OUTPUT_DIRECTORY,'robots.txt'));
         if (siteUrl) fs.copyFileSync(path.join(ROOT,'public/sitemap.xml'),path.join(OUTPUT_DIRECTORY,'sitemap.xml'));
         else fs.rmSync(path.join(OUTPUT_DIRECTORY,'sitemap.xml'),{force:true});
-        fs.writeFileSync(path.join(OUTPUT_DIRECTORY,'_headers'), "/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://avatars.githubusercontent.com; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'\n");
+        fs.writeFileSync(path.join(OUTPUT_DIRECTORY,'_headers'), "/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://avatars.githubusercontent.com https://raw.githubusercontent.com; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'\n");
     }
     console.log(`Prepared ${PAGES.length} pages and ${SNAPSHOT.projects.length} fallback projects (${HOSTED?'hosted backend':'static snapshot'}).`);
 }

@@ -92,14 +92,14 @@ test('a warm refresh spends only repository discovery; missing releases are nega
         return response(dataFor(url,projects));
     }});
     await service.refreshProjects();
-    assert.equal(calls,3);
+    assert.equal(calls,5); // Discovery, two releases, and two cached logo lookups.
     time+=600001; projects=[...projects,...repos(3).slice(2)];
     const next=await service.refreshProjects();
     assert.equal(next.projects.length,3);
-    assert.equal(calls,5); // One discovery + one brand-new project's release.
+    assert.equal(calls,8); // One discovery + the new project's release and logo.
     assert.equal(detailCalls,3);
     time+=600001; await service.refreshProjects();
-    assert.equal(calls,6);
+    assert.equal(calls,9);
     assert.equal(detailCalls,3);
 });
 

@@ -1,0 +1,27 @@
+{
+  "name": "Skypixel Framework",
+  "short_name": "Skypixel",
+  "description": "The project hub by MaxUltimat3.",
+  "background_color": "#090909",
+  "theme_color": "#090909",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/images/apple-touch-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/logo-512.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "purpose": "any"
+    }
+  ]
+}

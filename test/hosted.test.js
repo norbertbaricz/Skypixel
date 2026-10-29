@@ -26,11 +26,11 @@ test('fifty hosted visitors share one durable GitHub refresh and zero browser AP
         const snapshots=await Promise.all(Array.from({length:50},()=>sharedCatalog({DB:db},{waitUntil:p=>jobs.push(p)})));
         await Promise.all(jobs);
         assert.equal(jobs.length,1);
-        assert.equal(requests,2);
+        assert.equal(requests,3); // One catalog, one release, one logo lookup for all 50 visitors.
         const next=await sharedCatalog({DB:db},{waitUntil:p=>jobs.push(p)});
         assert.equal(next.projects.length,1);
         assert.equal(next.projects[0].name,'New-tool');
-        assert.equal(next.sync.budget.used,2);
+        assert.equal(next.sync.budget.used,3);
         assert.equal(jobs.length,1);
         assert.ok(snapshots.every(s=>s.projects.length>0));
         const browser=fs.readFileSync(require('node:path').join(__dirname,'../public/js/script.js'),'utf8');

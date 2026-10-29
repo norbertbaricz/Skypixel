@@ -45,3 +45,15 @@ test('new public repositories classify and appear without any curated entry', ()
     assert.equal(projects[0].summary,repo.description);
     assert.equal(C.filterProjects(projects,{q:'moderation',category:'Discord'}).length,1);
 });
+
+test('release notes format headings, lists, links, and code while keeping HTML and unsafe links inert', () => {
+    const { renderReleaseNotes } = require('../public/js/catalog');
+    const html = renderReleaseNotes('# Version 2\n\n## Changes\n- **Faster** startup\n- Use `start.sh`\n\n[Docs](https://example.com/docs)\n\n<script>alert(1)</script>\n[Bad](javascript:alert(1))\n\n```html\n<img src=x onerror=alert(1)>\n```', 'Version 2');
+    assert.match(html, /<h3>Changes<\/h3>/);
+    assert.match(html, /<ul><li><strong>Faster<\/strong>/);
+    assert.match(html, /<code>start.sh<\/code>/);
+    assert.match(html, /href="https:\/\/example.com\/docs"/);
+    assert.match(html, /&lt;script&gt;/);
+    assert.match(html, /&lt;img src=x onerror=alert\(1\)&gt;/);
+    assert.doesNotMatch(html, /<script|<img|href="javascript:|<h3>Version 2/);
+});

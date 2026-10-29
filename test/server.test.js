@@ -45,6 +45,10 @@ test('pages retain the original logo and intro; project APIs filter, paginate, a
             if (route === '/about') assert.ok(result.text.includes('The thinking behind the work.'));
         }
         const catalog = JSON.parse((await request(server, '/api/projects')).text);
+        const manifestResponse = await request(server, '/manifest.webmanifest');
+        assert.equal(manifestResponse.status, 200);
+        assert.match(manifestResponse.headers['content-type'], /application\/manifest\+json/);
+        assert.equal(JSON.parse(manifestResponse.text).background_color, '#090909');
         assert.equal(catalog.projects.length, 5);
         const windows = JSON.parse((await request(server, '/api/projects?category=Windows&q=booster')).text);
         assert.deepEqual(windows.projects.map(project => project.name), ['BoosterX']);
